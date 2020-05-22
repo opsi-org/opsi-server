@@ -1,0 +1,11 @@
+package:
+  name: opsi-server
+  type: binary
+  dependencies:
+    - opsi-utils
+    - opsiconfd
+  source_script:
+    - mkdir -p ${DST}/rootfs/x
+    - cp ${SRC}/x ${DST}/rootfs/x
+  #postinst_script:
+   # - /usr/bin/opsiconfd --setup
