@@ -1,11 +1,17 @@
+project:
+  name: opsi-server
+  version: 4.2.0
+  description: opsi server
+  homepage: http://www.opsi.org
+  license: AGPL-3.0
+  maintainer: uib GmbH <info@uib.de>
+
 package:
   name: opsi-server
   type: binary
   dependencies:
     - opsi-utils
     - opsiconfd
-  source_script:
-    - mkdir -p ${DST}/rootfs/x
-    - cp ${SRC}/x ${DST}/rootfs/x
-  #postinst_script:
-   # - /usr/bin/opsiconfd --setup
+  source_script: []
+    #- mkdir -p ${DST}/rootfs/x
+    #- cp ${SRC}/x ${DST}/rootfs/x
