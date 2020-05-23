@@ -9,9 +9,35 @@ project:
 package:
   name: opsi-server
   type: binary
-  dependencies:
-    - opsi-utils
-    - opsiconfd
+  depends:
+    - opsiconfd >= 4.2
+    #- opsipxeconfd >= 4.2
+    - opsi-linux-bootimage >= 20170620
+    - opsi-tftpd
+    - opsi-utils >= 4.2
+    - samba
+    - sudo
+    - wget
+  suggests:
+    - mariadb-server
+    - opsi-windows-support
+    - opsi-linux-support
+  provides:
+    - opsi-depotserver
+  breaks:
+    - opsi-depotserver (<< 4.1)
+  conflicts:
+    - opsi-server-expert
+  replaces:
+    - opsi-depotserver (<< 4.1), opsi-depotserver-expert
   source_script: []
     #- mkdir -p ${DST}/rootfs/x
     #- cp ${SRC}/x ${DST}/rootfs/x
+  subpackages:
+    - name: expert
+      depends:
+        - opsiconfd >= 4.2
+        #- opsipxeconfd >= 4.2
+        - opsi-linux-bootimage >= 20170620
+        - opsi-tftpd
+        - opsi-utils >= 4.2
