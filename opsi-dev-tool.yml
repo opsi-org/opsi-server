@@ -9,12 +9,13 @@ project:
 package:
   name: opsi-server
   type: binary
+  architecture: all
   depends:
-    - opsiconfd >= 4.2
-    #- opsipxeconfd >= 4.2
-    - opsi-linux-bootimage >= 20170620
+    - opsiconfd (>= 4.2)
+    #- opsipxeconfd (>= 4.2)
+    - opsi-linux-bootimage (>= 20170620)
     - opsi-tftpd
-    - opsi-utils >= 4.2
+    - opsi-utils (>= 4.2)
     - samba
     - sudo
     - wget
@@ -36,8 +37,8 @@ package:
   subpackages:
     - name: expert
       depends:
-        - opsiconfd >= 4.2
-        #- opsipxeconfd >= 4.2
-        - opsi-linux-bootimage >= 20170620
+        - opsiconfd (>= 4.2)
+        #- opsipxeconfd (>= 4.2)
+        - opsi-linux-bootimage (>= 20170620)
         - opsi-tftpd
-        - opsi-utils >= 4.2
+        - opsi-utils (>= 4.2)
