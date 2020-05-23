@@ -31,9 +31,15 @@ package:
     - opsi-server-expert
   replaces:
     - opsi-depotserver (<< 4.1), opsi-depotserver-expert
-  source_script: []
-    #- mkdir -p ${DST}/rootfs/x
-    #- cp ${SRC}/x ${DST}/rootfs/x
+  source_script:
+    - mkdir -p ${DST}/rootfs/var/lib/opsi/depot
+    - mkdir -p ${DST}/rootfs/var/lib/opsi/ntfs-images
+    - mkdir -p ${DST}/rootfs/var/lib/opsi/repository
+    - mkdir -p ${DST}/rootfs/var/lib/opsi/workbench
+    - mkdir -p ${DST}/rootfs/var/log/opsi/bootimage
+    - mkdir -p ${DST}/rootfs/var/log/opsi/clientconnect
+    - mkdir -p ${DST}/rootfs/var/log/opsi/instlog
+    - mkdir -p ${DST}/rootfs/var/log/opsi/userlogin
   subpackages:
     - name: expert
       depends:
