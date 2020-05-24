@@ -40,7 +40,8 @@ package:
     - mkdir -p "${DST}/rootfs/var/log/opsi/clientconnect"
     - mkdir -p "${DST}/rootfs/var/log/opsi/instlog"
     - mkdir -p "${DST}/rootfs/var/log/opsi/userlogin"
-    - cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc"
+    - mkdir -p "${DST}/rootfs/etc"
+    - cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc/opsi"
   postinst_script:
     - opsi-setup --set-rights /etc || true
   subpackages:
