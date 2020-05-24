@@ -42,7 +42,7 @@ package:
     - mkdir -p "${DST}/rootfs/var/log/opsi/userlogin"
     - cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc"
   postinst_script:
-    - opsi-setup --set-rights /etc
+    - opsi-setup --set-rights /etc || true
   subpackages:
     - name: expert
       depends:
