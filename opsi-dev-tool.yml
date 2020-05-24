@@ -32,14 +32,15 @@ package:
   replaces:
     - opsi-depotserver (<< 4.1), opsi-depotserver-expert
   source_script:
-    - mkdir -p ${DST}/rootfs/var/lib/opsi/depot
-    - mkdir -p ${DST}/rootfs/var/lib/opsi/ntfs-images
-    - mkdir -p ${DST}/rootfs/var/lib/opsi/repository
-    - mkdir -p ${DST}/rootfs/var/lib/opsi/workbench
-    - mkdir -p ${DST}/rootfs/var/log/opsi/bootimage
-    - mkdir -p ${DST}/rootfs/var/log/opsi/clientconnect
-    - mkdir -p ${DST}/rootfs/var/log/opsi/instlog
-    - mkdir -p ${DST}/rootfs/var/log/opsi/userlogin
+    - mkdir -p "${DST}/rootfs/var/lib/opsi/depot"
+    - mkdir -p "${DST}/rootfs/var/lib/opsi/ntfs-images"
+    - mkdir -p "${DST}/rootfs/var/lib/opsi/repository"
+    - mkdir -p "${DST}/rootfs/var/lib/opsi/workbench"
+    - mkdir -p "${DST}/rootfs/var/log/opsi/bootimage"
+    - mkdir -p "${DST}/rootfs/var/log/opsi/clientconnect"
+    - mkdir -p "${DST}/rootfs/var/log/opsi/instlog"
+    - mkdir -p "${DST}/rootfs/var/log/opsi/userlogin"
+    - cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc"
   subpackages:
     - name: expert
       depends:
