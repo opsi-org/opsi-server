@@ -21,6 +21,7 @@ package:
     - wget
   suggests:
     - mariadb-server
+    - redis-server (>= 5.0)
     - opsi-windows-support
     - opsi-linux-support
   provides:
