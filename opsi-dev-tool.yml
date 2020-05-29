@@ -3,7 +3,8 @@ project:
   version: 4.2.0
   description: opsi server
   homepage: http://www.opsi.org
-  license: AGPL-3.0
+  licenses:
+    - license: AGPL-3.0
   maintainer: uib GmbH <info@uib.de>
 
 package:
