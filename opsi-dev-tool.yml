@@ -13,7 +13,7 @@ package:
   architecture: all
   depends:
     - opsiconfd (>= 4.2)
-    #- opsipxeconfd (>= 4.2)
+    - opsipxeconfd (>= 4.2)
     - opsi-linux-bootimage (>= 20170620)
     - opsi-tftpd
     - opsi-utils (>= 4.2)
@@ -50,7 +50,7 @@ package:
     - name: expert
       depends:
         - opsiconfd (>= 4.2)
-        #- opsipxeconfd (>= 4.2)
+        - opsipxeconfd (>= 4.2)
         - opsi-linux-bootimage (>= 20170620)
         - opsi-tftpd
         - opsi-utils (>= 4.2)
