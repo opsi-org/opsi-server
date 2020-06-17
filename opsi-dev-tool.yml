@@ -17,7 +17,7 @@ package:
     - opsi-linux-bootimage (>= 20170620)
     - opsi-tftpd
     - opsi-utils (>= 4.2)
-    - python3-opsi (>= 4.2)
+    #- python3-opsi (>= 4.2)
     - samba
     - sudo
     - wget
