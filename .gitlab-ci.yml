@@ -1,7 +1,7 @@
 image: python:3.7-stretch
 
 stages:
-  - package
+  - publish
 
 .install_tools: &install_tools |
   export DEBIAN_FRONTEND=noninteractive
@@ -10,13 +10,17 @@ stages:
   pip3 install --trusted-host pypi.uib.gmbh --index-url http://pypi.uib.gmbh:8080/simple opsi-dev-tools
 
 package:obs_int:
-  stage: package
+  stage: publish
   script:
     - *install_tools
     - python3 -m opsidevtools -l info --obs-update-package https://obs.uib.gmbh home:uibmz:opsi:4.2:experimental
+  only:
+    - tags
 
 package:obs_ext:
-  stage: package
+  stage: publish
   script:
     - *install_tools
     - python3 -m opsidevtools -l info --obs-update-package https://build.opensuse.org home:uibmz:opsi:4.2:experimental
+  only:
+    - tags
