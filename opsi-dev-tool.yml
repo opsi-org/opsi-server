@@ -32,6 +32,7 @@ package:
     - opsi-depotserver (<< 4.1)
   conflicts:
     - opsi-server-expert
+    - python-opsi (<< 4.2)
   replaces:
     - opsi-depotserver (<< 4.1), opsi-depotserver-expert
   source_script: |
