@@ -63,7 +63,7 @@ package:
         - opsi-tftpd
         - opsi-utils (>= 4.2)
       provides:
-        opsi-server
+        - opsi-server
       conflicts:
         - opsi-server
         - opsi-server-full
@@ -87,7 +87,7 @@ package:
         - opsi-linux-support
         - grafana
       provides:
-        opsi-server
+        - opsi-server
       conflicts:
         - opsi-server
         - opsi-server-expert
