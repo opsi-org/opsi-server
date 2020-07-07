@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.4
+  version: 4.2.0.5
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -83,6 +83,7 @@ package:
         - redis-timeseries
         - opsi-windows-support
         - opsi-linux-support
+        - grafana
       conflicts:
         - opsi-server
         - opsi-server-expert
