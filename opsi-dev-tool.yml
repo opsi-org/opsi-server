@@ -36,7 +36,6 @@ package:
     - python-opsi (<< 4.2)
   replaces:
     - opsi-depotserver (<< 4.1)
-    - opsi-depotserver-expert
   source_script: |
     mkdir -p "${DST}/rootfs/var/lib/opsi/depot"
     mkdir -p "${DST}/rootfs/var/lib/opsi/ntfs-images"
@@ -66,6 +65,9 @@ package:
       conflicts:
         - opsi-server
         - opsi-server-full
+        - python-opsi (<< 4.2)
+      replaces:
+        - opsi-depotserver-expert
     - name: full
       depends:
         - opsiconfd (>= 4.2)
@@ -84,3 +86,4 @@ package:
       conflicts:
         - opsi-server
         - opsi-server-expert
+        - python-opsi (<< 4.2)
