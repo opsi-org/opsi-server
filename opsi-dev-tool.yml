@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.3
+  version: 4.2.0.4
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -17,13 +17,13 @@ package:
     - opsi-linux-bootimage (>= 20170620)
     - opsi-tftpd
     - opsi-utils (>= 4.2)
-    #- python3-opsi (>= 4.2)
     - samba
     - sudo
     - wget
   suggests:
     - mysql-server
     - redis-server (>= 5.0)
+    - redis-timeseries
     - opsi-windows-support
     - opsi-linux-support
   provides:
@@ -52,7 +52,7 @@ package:
     opsi-setup --set-rights /etc || true
     # Removing files dating before opsi 4.1
     [ -e /etc/opsi/version ] && rm /etc/opsi/version
-    /usr/bin/opsiconfd --setup --log-level-stderr=5 --log-level-file=0 || true
+    /usr/bin/opsiconfd setup --log-level-stderr=5 --log-level-file=0 || true
   subpackages:
     - name: expert
       depends:
@@ -61,3 +61,18 @@ package:
         - opsi-linux-bootimage (>= 20170620)
         - opsi-tftpd
         - opsi-utils (>= 4.2)
+    - name: full
+      depends:
+        - opsiconfd (>= 4.2)
+        - opsipxeconfd (>= 4.2)
+        - opsi-linux-bootimage (>= 20170620)
+        - opsi-tftpd
+        - opsi-utils (>= 4.2)
+        - samba
+        - sudo
+        - wget
+        - mysql-server | mariadb-server
+        - redis-server (>= 5.0)
+        - redis-timeseries
+        - opsi-windows-support
+        - opsi-linux-support
