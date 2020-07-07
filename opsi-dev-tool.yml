@@ -32,9 +32,11 @@ package:
     - opsi-depotserver (<< 4.1)
   conflicts:
     - opsi-server-expert
+    - opsi-server-full
     - python-opsi (<< 4.2)
   replaces:
-    - opsi-depotserver (<< 4.1), opsi-depotserver-expert
+    - opsi-depotserver (<< 4.1)
+    - opsi-depotserver-expert
   source_script: |
     mkdir -p "${DST}/rootfs/var/lib/opsi/depot"
     mkdir -p "${DST}/rootfs/var/lib/opsi/ntfs-images"
