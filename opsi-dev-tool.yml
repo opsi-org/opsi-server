@@ -62,6 +62,8 @@ package:
         - opsi-linux-bootimage (>= 20170620)
         - opsi-tftpd
         - opsi-utils (>= 4.2)
+      provides:
+        opsi-server
       conflicts:
         - opsi-server
         - opsi-server-full
@@ -84,6 +86,8 @@ package:
         - opsi-windows-support
         - opsi-linux-support
         - grafana
+      provides:
+        opsi-server
       conflicts:
         - opsi-server
         - opsi-server-expert
