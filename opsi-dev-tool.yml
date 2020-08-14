@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.7
+  version: 4.2.0.8
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -47,6 +47,8 @@ package:
     mkdir -p "${DST}/rootfs/var/log/opsi/userlogin"
     mkdir -p "${DST}/rootfs/etc"
     cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc/opsi"
+  preinst_script: |
+    [ ! -e /etc/opsi/opsi.conf -a -e /etc/opsi/opsi.conf.dpk-new ] && mv /etc/opsi/opsi.conf.dpkg-new /etc/opsi/opsi.conf
   postinst_script: |
     [ -e /var/lib/opsi/server_commands_custom.conf ] || touch /var/lib/opsi/server_commands_custom.conf
     # Removing files dating before opsi 4.1
