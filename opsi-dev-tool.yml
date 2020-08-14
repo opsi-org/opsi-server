@@ -48,7 +48,10 @@ package:
     mkdir -p "${DST}/rootfs/etc"
     cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc/opsi"
   preinst_script: |
-    [ ! -e /etc/opsi/opsi.conf -a -e /etc/opsi/opsi.conf.dpkg-new ] && mv /etc/opsi/opsi.conf.dpkg-new /etc/opsi/opsi.conf || true
+    if [ ! -e /etc/opsi/opsi.conf -a -e /etc/opsi/opsi.conf.dpkg-new ]; then
+      echo "Creating /etc/opsi/opsi.conf"
+      cp -a /etc/opsi/opsi.conf.dpkg-new /etc/opsi/opsi.conf
+    fi
   postinst_script: |
     [ -e /var/lib/opsi/server_commands_custom.conf ] || touch /var/lib/opsi/server_commands_custom.conf
     # Removing files dating before opsi 4.1
