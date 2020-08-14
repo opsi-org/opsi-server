@@ -47,11 +47,6 @@ package:
     mkdir -p "${DST}/rootfs/var/log/opsi/userlogin"
     mkdir -p "${DST}/rootfs/etc"
     cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc/opsi"
-  preinst_script: |
-    if [ ! -e /etc/opsi/opsi.conf ]; then
-      echo "Creating /etc/opsi/opsi.conf"
-      echo -e "[groups]\nfileadmingroup = opsifileadmins" > /etc/opsi/opsi.conf
-    fi
   postinst_script: |
     [ -e /var/lib/opsi/server_commands_custom.conf ] || touch /var/lib/opsi/server_commands_custom.conf
     # Removing files dating before opsi 4.1
