@@ -48,6 +48,13 @@ package:
     mkdir -p "${DST}/rootfs/etc"
     cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc/opsi"
   postinst_script: |
+    if grep "^fileadmingroup *= *opsifileadmins$" /etc/opsi/opsi.conf >/dev/null; then
+      if ! getent group opsifileadmins >/dev/null; then
+        if getent group pcpatch >/dev/null; then
+          sed -i s"/^fileadmingroup.*/fileadmingroup = pcpatch/" /etc/opsi/opsi.conf
+        fi
+      fi
+    fi
     [ -e /var/lib/opsi/server_commands_custom.conf ] || touch /var/lib/opsi/server_commands_custom.conf
     # Removing files dating before opsi 4.1
     [ -e /etc/opsi/version ] && rm /etc/opsi/version
