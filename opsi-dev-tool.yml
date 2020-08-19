@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.6
+  version: 4.2.0.10
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -48,12 +48,20 @@ package:
     mkdir -p "${DST}/rootfs/etc"
     cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc/opsi"
   postinst_script: |
+    if grep "^fileadmingroup *= *opsifileadmins$" /etc/opsi/opsi.conf >/dev/null; then
+      if ! getent group opsifileadmins >/dev/null; then
+        if getent group pcpatch >/dev/null; then
+          sed -i s"/^fileadmingroup.*/fileadmingroup = pcpatch/" /etc/opsi/opsi.conf
+        fi
+      fi
+    fi
     [ -e /var/lib/opsi/server_commands_custom.conf ] || touch /var/lib/opsi/server_commands_custom.conf
-    opsi-setup --set-rights /var/lib/opsi/server_commands_custom.conf || true
-    opsi-setup --set-rights /etc || true
     # Removing files dating before opsi 4.1
     [ -e /etc/opsi/version ] && rm /etc/opsi/version
+    # Setup
     /usr/bin/opsiconfd setup --log-level-stderr=5 --log-level-file=0 || true
+    opsi-setup --set-rights /var/lib/opsi/server_commands_custom.conf || true
+    opsi-setup --set-rights /etc || true
   subpackages:
     - name: expert
       depends:
