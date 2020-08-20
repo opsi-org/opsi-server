@@ -128,5 +128,4 @@ TPM = Trusted Platform Module
 TPM.manufacturer = Manufacturer
 TPM.version = Version
 TPM.manufacturerversion =  Manufacturer version
-TPM.IsEnabled_InitialValue = enabled
-
+TPM.enabled = enabled
