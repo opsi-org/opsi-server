@@ -14,7 +14,7 @@ package:
   depends:
     - opsiconfd (>= 4.2)
     - opsipxeconfd (>= 4.2)
-    - opsi-linux-bootimage (>= 20170620)
+    - opsi-linux-bootimage (>= 20200824)
     - opsi-tftpd
     - opsi-utils (>= 4.2)
     - samba
@@ -67,7 +67,7 @@ package:
       depends:
         - opsiconfd (>= 4.2)
         - opsipxeconfd (>= 4.2)
-        - opsi-linux-bootimage (>= 20170620)
+        - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd
         - opsi-utils (>= 4.2)
       provides:
@@ -82,7 +82,7 @@ package:
       depends:
         - opsiconfd (>= 4.2)
         - opsipxeconfd (>= 4.2)
-        - opsi-linux-bootimage (>= 20170620)
+        - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd
         - opsi-utils (>= 4.2)
         - samba
