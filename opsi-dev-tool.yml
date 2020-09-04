@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.12
+  version: 4.2.0.13
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -27,7 +27,7 @@ package:
     - opsi-windows-support
     - opsi-linux-support
   provides:
-    - opsi-depotserver
+    - opsi-depotserver (= 4.2)
   breaks:
     - opsi-depotserver (<< 4.1)
   conflicts:
