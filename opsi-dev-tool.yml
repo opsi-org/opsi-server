@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.15
+  version: 4.2.0.16
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -62,6 +62,7 @@ package:
     /usr/bin/opsiconfd setup --log-level-stderr=5 --log-level-file=0 || true
     opsi-setup --set-rights /var/lib/opsi/server_commands_custom.conf || true
     opsi-setup --set-rights /etc || true
+    [ ! -e /etc/dhcp/dhcpd.conf ] && sed -i s'#/etc/dhcp/dhcpd.conf#/etc/dhcpd.conf#' /etc/opsi/backends/dhcpd.conf
   subpackages:
     - name: expert
       depends:
