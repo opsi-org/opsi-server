@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.16
+  version: 4.2.0.17
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -63,6 +63,7 @@ package:
     opsi-setup --set-rights /var/lib/opsi/server_commands_custom.conf || true
     opsi-setup --set-rights /etc || true
     [ ! -e /etc/dhcp/dhcpd.conf ] && sed -i s'#/etc/dhcp/dhcpd.conf#/etc/dhcpd.conf#' /etc/opsi/backends/dhcpd.conf
+    [ -e /var/lib/tftpboot/opsi ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf
   subpackages:
     - name: expert
       depends:
