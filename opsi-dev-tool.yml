@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.20
+  version: 4.2.0.21
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -63,6 +63,7 @@ package:
     opsi-setup --set-rights /var/lib/opsi/server_commands_custom.conf || true
     opsi-setup --set-rights /etc || true
     [ -e /etc/dhcpd.conf ] && sed -i s'#"dhcpdConfigFile".*#"dhcpdConfigFile":         u"/etc/dhcpd.conf",#' /etc/opsi/backends/dhcpd.conf
+    [ -e /etc/dhcpd.conf ] && sed -i s'#linux/pxelinux.0#opsi/pxelinux.0#' /etc/opsi/backends/dhcpd.conf
     [ -e /var/lib/tftpboot/opsi ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf
     exit 0
   subpackages:
