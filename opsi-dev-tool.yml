@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.28
+  version: 4.2.0.29
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -34,14 +34,14 @@ package:
     - opsiconfd (>= 4.2)
     - opsipxeconfd (>= 4.2)
     - opsi-linux-bootimage (>= 20200824)
-    - opsi-tftpd-hpa
+    - opsi-tftpd-hpa | opsi-tftp-hpa-server
     - opsi-utils (>= 4.2)
     - samba
     - sudo
     - wget
   suggests:
     - mysql-server
-    - redis-server (>= 5.0)
+    - redis-server (>= 6.0)
     - redis-timeseries
     - opsi-windows-support
     - opsi-linux-support
@@ -75,7 +75,7 @@ package:
         - opsiconfd (>= 4.2)
         - opsipxeconfd (>= 4.2)
         - opsi-linux-bootimage (>= 20200824)
-        - opsi-tftpd-hpa
+        - opsi-tftpd-hpa | opsi-tftp-hpa-server
         - opsi-utils (>= 4.2)
       provides:
         - opsi-server (= 4.2)
@@ -90,13 +90,13 @@ package:
         - opsiconfd (>= 4.2)
         - opsipxeconfd (>= 4.2)
         - opsi-linux-bootimage (>= 20200824)
-        - opsi-tftpd-hpa
+        - opsi-tftpd-hpa | opsi-tftp-hpa-server
         - opsi-utils (>= 4.2)
         - samba
         - sudo
         - wget
         - mysql-server | mariadb-server
-        - redis-server (>= 5.0)
+        - redis-server (>= 6.0)
         - redis-timeseries
         - opsi-windows-support
         - opsi-linux-support
@@ -110,7 +110,7 @@ package:
       postinst_script:
         - *postinst_script
         - |
-          update-inetd --remove tftp
+          update-inetd --remove tftp 2>/dev/null || true
           systemctl daemon-reload
           systemctl enable grafana-server
           systemctl start grafana-server
