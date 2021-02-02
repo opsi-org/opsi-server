@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.29
+  version: 4.2.0.30
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -111,7 +111,7 @@ package:
         - *postinst_script
         - |
           update-inetd --remove tftp 2>/dev/null || true
-          systemctl daemon-reload
-          systemctl enable grafana-server
-          systemctl start grafana-server
+          systemctl daemon-reload || true
+          systemctl enable grafana-server || true
+          systemctl start grafana-server || true
           exit 0
