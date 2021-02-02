@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.30
+  version: 4.2.0.32
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -108,10 +108,17 @@ package:
         - opsi-server-expert
         - python-opsi (<< 4.2)
       postinst_script:
+        - |
+          systemctl daemon-reload || true
+          systemctl enable mysql || true
+          systemctl start mysql || true
+          systemctl enable mariadb || true
+          systemctl start mariadb || true
+          systemctl enable redis-server || true
+          systemctl start redis-server || true
         - *postinst_script
         - |
           update-inetd --remove tftp 2>/dev/null || true
-          systemctl daemon-reload || true
           systemctl enable grafana-server || true
           systemctl start grafana-server || true
           exit 0
