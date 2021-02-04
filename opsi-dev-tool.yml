@@ -122,5 +122,6 @@ package:
           grep opsi_depot /etc/samba/smb.conf >/dev/null 2>&1 || opsi-setup --auto-configure-samba || true
           for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
           for i in nmb nmbd smb smbd; do systemctl restart $i 2>/dev/null || true; done
+          opsi-setup --auto-configure-dhcpd 2>/dev/null || true
         - *postinst_script
         - exit 0
