@@ -119,5 +119,8 @@ package:
           systemctl enable grafana-server || true
           systemctl start grafana-server || true
           update-inetd --remove tftp 2>/dev/null || true
+          grep opsi_depot /etc/samba/smb.conf >/dev/null 2>&1 || opsi-setup --auto-configure-samba || true
+          for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
+          for i in nmb nmbd smb smbd; do systemctl restart $i 2>/dev/null || true; done
         - *postinst_script
         - exit 0
