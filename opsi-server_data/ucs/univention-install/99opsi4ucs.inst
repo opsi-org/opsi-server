@@ -1,0 +1,591 @@
+#! /bin/bash -e
+
+# Copyright (C) 2014-2019 uib GmbH
+# http://www.uib.de
+# All rights reserved.
+
+VERSION=47
+VERBOSE=true
+
+. /usr/share/univention-join/joinscripthelper.lib
+joinscript_init
+
+# Required for reading network information
+. /usr/share/univention-lib/base.sh
+# Required for ucs_addServiceToLocalhost
+. /usr/share/univention-lib/ldap.sh
+# Required for check for synchronised opsifileadmin group
+. /usr/share/univention-lib/ucr.sh
+
+SERVER_ROLE=$(ucr get server/role)
+OPSI_ROLE="configserver"
+ROOT_DN=$(ucr get ldap/base)
+LDAP_MASTER=$(ucr get ldap/master)
+LDAP_USER=$(ucr get ldap/hostdn)
+LDAP_SECRET=$(cat /etc/machine.secret)
+HOSTNAME=$(uname -n)
+DOMAIN=$(ucr get domainname)
+FQDN=$(hostname --fqdn)
+IPADDRESS=$(getent hosts $FQDN | head -n1 | cut -d' ' -f1)
+NETMASK=""
+GATEWAY=""
+SUBNET=""
+BROADCAST=""
+WINDOMAIN=$(ucr get windows/domain)
+UCS_VERSION=$(ucr get version/version)
+UCS_PATCHLEVEL=$(ucr get version/patchlevel)
+
+if   [ "$SERVER_ROLE" = "domaincontroller_master" ]; then
+	$VERBOSE && echo -e "\nRunning on UCS Master"
+elif [ "$SERVER_ROLE" = "domaincontroller_slave" ]; then
+	$VERBOSE && echo -e "\nRunning on UCS Slave"
+elif [ "$SERVER_ROLE" = "domaincontroller_backup" ]; then
+	$VERBOSE && echo -e "\nRunning on UCS Backup"
+else
+	$VERBOSE && echo -e "\nRunning on $SERVER_ROLE"
+fi
+
+if [ -e "/etc/init.d/univention-dhcp"  ]; then
+	DHCPSERVER=1
+else
+	DHCPSERVER=0
+fi
+
+LDAP_PORT=$(ucr get ldap/master/port)
+
+# --- Test ldap connection ------------------------------------------------------------------------------------------------------
+$VERBOSE && echo "Testing ldap connection to $LDAP_MASTER"
+set +e
+if [ $SERVER_ROLE = "memberserver" ]; then
+	univention-ldapsearch -D "$LDAP_USER" -w "$LDAP_SECRET" -s base > /dev/null
+else
+	univention-ldapsearch -x userPassword | grep "^userPassword:" >/dev/null
+fi
+ret=$?
+set -e
+if [ $ret != 0 ]; then
+	echo "" 1>&2
+	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' 1>&2
+	echo " Connect to ldap master $LDAP_MASTER as $LDAP_USER failed" 1>&2
+	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' 1>&2
+	echo "" 1>&2
+	exit 1
+fi
+
+
+# --- Get network config --------------------------------------------------------------------------------------------------------
+IPADDRESS=`get_default_ip_address`
+GATEWAY=`route -n | grep ^0.0.0.0 | awk '{ printf $2}'`
+
+NETMASK=`get_default_netmask`
+[ "$NETMASK" = "" ] && NETMASK="255.255.255.0"
+
+if [ "$IPADDRESS" != "" ]; then
+	for part in 1 2 3 4; do
+		I[$part]=$(echo $IPADDRESS | cut -d . -f $part)
+		M[$part]=$(echo $NETMASK | cut -d . -f $part)
+	done
+
+	for part in 1 2 3 4; do
+		N[$part]=$((${I[$part]} & ${M[$part]}))
+		B[$part]=$((${N[$part]} | $((${M[$part]} ^255))))
+	done
+
+	SUBNET="${N[1]}.${N[2]}.${N[3]}.${N[4]}"
+	BROADCAST="${B[1]}.${B[2]}.${B[3]}.${B[4]}"
+fi
+
+
+# --- Determine opsi role -------------------------------------------------------------------------------------------------------
+set +e
+config_server="$(univention-ldapsearch -x -L -s sub -b "$ROOT_DN" "(univentionService=OpsiConfigserver)" | grep -i '^cn:' | head -n1 | cut -d ':' -f2 | tr -d ' ' 2>/dev/null).$DOMAIN"
+$VERBOSE && echo "Found configserver: $config_server"
+set -e
+if [ "$config_server" == ".$DOMAIN" ]; then
+	$VERBOSE && echo "No Server marked as OpsiConfigserver, trying to set $FQDN as OpsiConfigserver for $ROOT_DN"
+	ucs_addServiceToLocalhost "OpsiConfigserver" "$@"
+
+elif [ "$config_server" != ".$DOMAIN" -a "$config_server" != "$FQDN" ]; then
+	OPSI_ROLE="depotserver"
+fi
+
+
+# --- Show system information ---------------------------------------------------------------------------------------------------
+$VERBOSE && echo -e "\nSystem information"
+$VERBOSE && echo "     UCS version      : $UCS_VERSION"
+$VERBOSE && echo "     UCS patchlevel   : $UCS_PATCHLEVEL"
+$VERBOSE && echo "     UCS role         : $SERVER_ROLE"
+$VERBOSE && echo "     Opsi server role : $OPSI_ROLE"
+$VERBOSE && echo "     Root dn          : $ROOT_DN"
+$VERBOSE && echo "     LDAP master      : $LDAP_MASTER"
+$VERBOSE && echo "     LDAP user        : $LDAP_USER"
+$VERBOSE && echo "     Hostname         : $HOSTNAME"
+$VERBOSE && echo "     Domain           : $DOMAIN"
+$VERBOSE && echo "     FQDN             : $FQDN"
+$VERBOSE && echo "     IP-Address       : $IPADDRESS"
+$VERBOSE && echo "     Netmask          : $NETMASK"
+$VERBOSE && echo "     Gateway          : $GATEWAY"
+$VERBOSE && echo "     Subnet           : $SUBNET"
+$VERBOSE && echo "     Broadcast        : $BROADCAST"
+$VERBOSE && echo "     Windomain        : $WINDOMAIN"
+
+## --- Deleting existing opsi extended-attribute ------------------------------------------------------------------------
+udm settings/extended_attribute remove "$@" \
+	--dn="cn=opsiHostId,cn=custom attributes,cn=univention,$ROOT_DN" --ignore_not_exists
+
+# --- Add users and groups ------------------------------------------------------------------------------------------------------
+$VERBOSE && echo "Adding system users and groups..."
+
+fileadmingroup="opsifileadmins"
+set +e
+grep "pcpatch" /etc/opsi/opsi.conf 2>/dev/null || true
+if [ $? = 0 ]; then
+	sed -i "s/pcpatch/opsifileadmins/g" /etc/opsi/opsi.conf
+fi
+
+udm groups/group list "$@" --filter "(name=OPSI Depot Servers)" | grep '^DN:' 1>/dev/null
+ret=$?
+set -e
+if [ $ret != 0 ]; then
+	$VERBOSE && echo "Adding group OPSI Depot Servers"
+	udm groups/group create "$@" \
+		--position="cn=groups,$ROOT_DN" \
+		--set name="OPSI Depot Servers" \
+		--set description="opsi depot servers" \
+		--ignore_exists
+fi
+udm groups/group modify "$@" \
+	--dn "cn=OPSI Depot Servers,cn=groups,$ROOT_DN" \
+	--append hosts="$LDAP_USER" \
+	--ignore_exists
+
+set +e
+$VERBOSE && echo "Adding system users and group: $fileadmingroup"
+$VERBOSE && echo "Checking if pcpatch group exists"
+PCPATCH_DN=$(udm groups/group list "$@" --filter "(name=pcpatch)" | grep '^DN:' | cut -d " " -f2)
+if [ "$PCPATCH_DN" != "" ]; then
+	$VERBOSE && echo "Group pcpatch found, renaming to opsifileadmins"
+	udm groups/group modify --dn "$PCPATCH_DN" --set name="$fileadmingroup"
+fi
+udm groups/group list "$@" --filter "(name=$fileadmingroup)" | grep '^DN:' 1>/dev/null
+ret=$?
+$VERBOSE && echo "Result: $ret"
+set -e
+
+if [ $ret != 0 ]; then
+	$VERBOSE && echo "Adding group $fileadmingroup"
+	udm groups/group create "$@" \
+		--position="cn=groups,$ROOT_DN" \
+		--set name="$fileadmingroup" \
+		--set description="opsi file admin group" \
+		--ignore_exists
+fi
+
+set +e
+udm groups/group list "$@" --filter "(name=opsiadmin)" | grep '^DN:' 1>/dev/null
+ret=$?
+set -e
+if [ $ret != 0 ]; then
+	$VERBOSE && echo "Adding group opsiadmin"
+	udm groups/group create "$@" \
+		--position="cn=groups,$ROOT_DN" \
+		--set name="opsiadmin" \
+		--set description="opsi config admin group" \
+		--ignore_exists
+fi
+
+set +e
+udm users/user list "$@" --filter "(uid=pcpatch)" | grep '^DN:' 1>/dev/null
+pcpatchUserMissing=$?
+set -e
+if [ $pcpatchUserMissing -ne 0 ]; then
+	# User pcpatch does not exist in ldap
+	$VERBOSE && echo "Adding user pcpatch"
+
+	pcpatchpassword=`makepasswd --chars=32`
+
+	udm users/user create "$@" \
+		--position="cn=users,$ROOT_DN" \
+		--set username="pcpatch" \
+		--set description="opsi-pseudo user" \
+		--set unixhome="/var/lib/opsi" \
+		--set primaryGroup="cn=$fileadmingroup,cn=groups,$ROOT_DN" \
+		--set lastname="pcpatch" \
+		--set password="${pcpatchpassword}" \
+		--set overridePWLength=1 \
+		--ignore_exists
+
+	set +e
+	$VERBOSE && echo -n "Waiting for opsi fileadmingroup to be synced:"
+	count=0
+	while [ $count -le 600 ]; do
+		grep "$fileadmingroup" /var/lib/extrausers/group >/dev/null 2>/dev/null && break
+		$VERBOSE && echo -n "."
+		sleep 1
+		count=$((count+1))
+	done
+	$VERBOSE && echo "OK"
+	set -e
+fi
+
+set +e
+udm users/user list "$@" --filter "(uid=opsiconfd)" | grep '^DN:' 1>/dev/null
+ret=$?
+set -e
+if [ $ret != 0 ]; then
+	# User opsiconfd does not exist in ldap
+	$VERBOSE && echo "Adding user opsiconfd"
+
+	pass=`makepasswd --chars=32`
+
+	udm users/user create "$@" \
+		--position="cn=users,$ROOT_DN" \
+		--set username="opsiconfd" \
+		--set description="opsi configuration daemon user" \
+		--set unixhome="/var/lib/opsi" \
+		--set primaryGroup="cn=$fileadmingroup,cn=groups,$ROOT_DN" \
+		--set lastname="opsiconfd" \
+		--set password="${pass}" \
+		--set overridePWLength=1 \
+		--ignore_exists
+fi
+
+udm groups/group modify "$@" \
+	--dn "cn=opsiadmin,cn=groups,$ROOT_DN" \
+	--append users="uid=opsiconfd,cn=users,$ROOT_DN"
+
+# Remove users/groups from passwd/group
+userdel pcpatch >/dev/null 2>/dev/null || true
+userdel opsiconfd >/dev/null 2>/dev/null || true
+[ -e /tmp/.group.tmp.opsi4ucs ] && rm /tmp/.group.tmp.opsi4ucs
+cp /etc/group /tmp/.group.tmp.opsi4ucs
+cat /tmp/.group.tmp.opsi4ucs | grep -v '^pcpatch:' | grep -v '^opsiadmin:' | grep -v '^opsiconfd' >/etc/group || true
+rm /tmp/.group.tmp.opsi4ucs
+
+
+udm groups/group modify "$@" \
+	--dn "cn=opsiadmin,cn=groups,$ROOT_DN" \
+	--append users="uid=Administrator,cn=users,$ROOT_DN"
+
+
+
+# --- Add samba shares ----------------------------------------------------------------------------------------------------------
+$VERBOSE && echo "Creating container for samba shares"
+udm container/cn create "$@" \
+	--ignore_exists \
+	--position="cn=shares,$ROOT_DN" \
+	--set name=$FQDN
+
+USERID=$(getent passwd opsiconfd | cut -d ":" -f 3)
+GROUPID=$(getent group opsifileadmins | cut -d ":" -f 3)
+
+set +e
+udm shares/share list "$@" --filter "(name=opsi_depot_rw)" | grep '^DN:' | grep $FQDN 1>/dev/null
+ret=$?
+set -e
+if [ $ret != 0 ]; then
+	$VERBOSE && echo "Adding samba share opsi_depot_rw"
+	udm shares/share create "$@" \
+		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
+		--set name=opsi_depot_rw \
+		--set host=$FQDN \
+		--set path=/var/lib/opsi/depot \
+		--set owner=$USERID \
+		--set group=$GROUPID \
+		--set directorymode=0755 \
+		--set sambaName=opsi_depot_rw \
+		--ignore_exists
+fi
+
+set +e
+udm shares/share list "$@" --filter "(name=opsi_depot)" | grep '^DN:' | grep $FQDN 1>/dev/null
+ret=$?
+set -e
+if [ $ret != 0 ]; then
+	$VERBOSE && echo "Adding samba share opsi_depot"
+	udm shares/share create "$@" \
+		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
+		--set name=opsi_depot \
+		--set host=$FQDN \
+		--set path=/var/lib/opsi/depot \
+		--set owner=$USERID \
+		--set group=$GROUPID \
+		--set sambaName=opsi_depot \
+		--set sambaWriteable=0 \
+		--set sambaBrowseable=1 \
+		--set sambaPublic=0 \
+		--set sambaCustomSettings='"follow symlinks" yes' \
+		--ignore_exists
+fi
+if [ ! -e "/var/lib/opsi/depot" -a ! -L "/var/lib/opsi/depot" -a -e "/opt/pcbin/install" ]; then
+	ln -s /opt/pcbin/install /var/lib/opsi/depot
+fi
+
+set +e
+udm shares/share list "$@" --filter "(name=opsi_workbench)" | grep '^DN:' | grep $FQDN 1>/dev/null
+ret=$?
+set -e
+if [ $ret != 0 ]; then
+	$VERBOSE && echo "Adding samba share opsi_workbench"
+	udm shares/share create "$@" \
+		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
+		--set name=opsi_workbench \
+		--set host=$FQDN \
+		--set path=/var/lib/opsi/workbench \
+		--set owner=$USERID \
+		--set group=$GROUPID \
+		--set directorymode=0755 \
+		--set sambaName=opsi_workbench \
+		--set sambaWriteable=1 \
+		--set sambaBrowseable=1 \
+		--set sambaPublic=0 \
+		--set sambaCreateMode=0774 \
+		--set sambaDirectoryMode=0775 \
+		--set sambaSecurityMode=0777 \
+		--set sambaDirectorySecurityMode=0777 \
+		--ignore_exists
+fi
+
+set +e
+udm shares/share list "$@" --filter "(name=opsi_images)" | grep '^DN:' | grep $FQDN 1>/dev/null
+ret=$?
+set -e
+if [ $ret != 0 ]; then
+	$VERBOSE && echo "Adding samba share opsi_images"
+	udm shares/share create "$@" \
+		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
+		--set name=opsi_images \
+		--set host=$FQDN \
+		--set path=/var/lib/opsi/ntfs-images \
+		--set owner=$USERID \
+		--set group=$GROUPID \
+		--set directorymode=0755 \
+		--set sambaName=opsi_images \
+		--set sambaWriteable=1 \
+		--set sambaBrowseable=1 \
+		--set sambaPublic=0 \
+		--set sambaCreateMode=0774 \
+		--set sambaDirectoryMode=0775 \
+		--set sambaSecurityMode=0777 \
+		--set sambaDirectorySecurityMode=0777 \
+		--ignore_exists
+fi
+
+# Fix for Executable Bit problem but only for opsi-depot Share
+# Changing ntacl-backend settings to native (default)
+
+systemctl reload smbd.service || echo "Failed to reload smbd.service"
+
+$VERBOSE && echo "Waiting for samba shares"
+sleep 5
+
+$VERBOSE && echo "Setting samba/acl/allow/execute/always=true"
+ucr set samba/acl/allow/execute/always=true
+
+ucr set samba4/ntacl/backend=native
+
+# --- Configure dhcp ------------------------------------------------------------------------------------------------------------
+if [ "$SERVER_ROLE" = "domaincontroller_master" ]; then
+	set +e
+	univention-ldapsearch -x -L -s base -b "cn=$DOMAIN,cn=dhcp,$ROOT_DN" | grep use-host-decl-names >/dev/null
+	ret=$?
+	set -e
+	if [ $ret != 0 ]; then
+		if [ $DHCPSERVER = "1" ]; then
+			$VERBOSE && echo "Adding dhcpStatement: use-host-decl-names on"
+			echo -e "dn: cn=$DOMAIN,cn=dhcp,$ROOT_DN\nadd: dhcpStatements\ndhcpStatements: use-host-decl-names on\n" \
+				| ldapmodify -x -h "$LDAP_MASTER" -p $LDAP_PORT -ZZ -D "cn=admin,$ROOT_DN" -y "/etc/ldap.secret" >/dev/null
+		else
+			$VERBOSE && echo "DHCP-Server installation not found, skipping patching dhcp-server."
+		fi
+	fi
+fi
+
+# --- Configure opsi ------------------------------------------------------------------------------------------------------------
+$VERBOSE && echo "Configuring opsi"
+$VERBOSE && echo "Checking security options for opsi"
+
+ucr set security/packetfilter/package/opsi4ucs/tcp/4447/all=ACCEPT
+ucr set security/packetfilter/package/opsi4ucs/udp/69/all=ACCEPT
+ucr set security/packetfilter/package/opsi4ucs/tcp/4447/all/en="Port for opsi-Webservice"
+ucr set security/packetfilter/package/opsi4ucs/udp/69/all/en="Port for TFTPD"
+
+$VERBOSE && echo "Cleanup old opsi local-Filterrules"
+
+TEMPFILE=$(tempfile)
+
+grep -v "dport 69"  /etc/security/packetfilter.d/50_local.sh | grep  -v "dport 4447" > $TEMPFILE
+cat $TEMPFILE > /etc/security/packetfilter.d/50_local.sh
+/usr/sbin/service univention-firewall restart
+
+if [ -e "/etc/univention/ssl/$FQDN/cert.pem" -a -e "/etc/univention/ssl/$FQDN/private.key" ]; then
+	$VERBOSE && echo "Creating opsiconfd.pem"
+
+	cat /etc/univention/ssl/$FQDN/private.key > /etc/opsi/opsiconfd.pem
+	grep -A 50 "BEGIN CERTIFICATE" /etc/univention/ssl/$FQDN/cert.pem >> /etc/opsi/opsiconfd.pem
+	chmod 600 /etc/opsi/opsiconfd.pem
+	chown opsiconfd:root /etc/opsi/opsiconfd.pem || true
+else
+	if [ -e "/etc/univention/ssl/$HOSTNAME/cert.pem" -a -e "/etc/univention/ssl/$HOSTNAME/private.key" ]; then
+		# This is a fallback if the foldername is != FQDN
+		$VERBOSE && echo "Creating opsiconfd.pem"
+
+		cat /etc/univention/ssl/$HOSTNAME/private.key > /etc/opsi/opsiconfd.pem
+		grep -A 50 "BEGIN CERTIFICATE" /etc/univention/ssl/$HOSTNAME/cert.pem >> /etc/opsi/opsiconfd.pem
+		chmod 600 /etc/opsi/opsiconfd.pem
+		chown opsiconfd:root /etc/opsi/opsiconfd.pem || true
+	else
+		if [ ! -e "/etc/opsi/opsiconfd.pem" ]; then
+			$VERBOSE && echo "WARNING: Unable to automatically create opsiconfd.pem! You need to create /etc/opsi/opsiconfd.pem manually!"
+		fi
+	fi
+fi
+
+if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master" -a "$SERVER_ROLE" != "domaincontroller_backup" ]; then
+	ln -sf /etc/opsi/backendManager/dispatch.conf.jsonrpc /etc/opsi/backendManager/dispatch.conf
+	$VERBOSE && echo "Registering Server as OpsiDepotserver on $config_server"
+	credentials="$@"
+	opsi-setup --register-depot -l5 --binddata "--configserver $config_server $credentials"
+
+	if [ -e "/tmp/opsi.configure.package.updater" ]; then
+		# We shall configure opsi-package-updater to retrieve packages from
+		# the configserver.
+
+		if [ "$config_server" = ".$DOMAIN" ]; then
+			$VERBOSE && echo "No existing OpsiConfigserver found - no automatic configuration of opsi-package-updater."
+		elif [ "$config_server" != ".$DOMAIN" -a "$config_server" != "$FQDN" -a -n "$config_server" -a -e "/etc/opsi/package-updater.repos.d/opsi-server.repo" ]; then
+			# We found a configserver.
+			# We want to configure the opsi-package-updater to work with it.
+			$VERBOSE && echo -n "Configuring opsi-package-updater to run against $config_server:"
+			sed --in-place "s/^active = true/active = false/gi" /etc/opsi/package-updater.repos.d/*.repo
+			$VERBOSE && echo -n "."
+			sed --in-place '/\[repository_opsi_server\]/{n;s/active = false/active = true/}' /etc/opsi/package-updater.repos.d/opsi-server.repo
+			$VERBOSE && echo -n "."
+			sed --in-place "/\[repository_opsi_server\]/{n;n;s/opsiDepotId =/opsiDepotId = $config_server/}" /etc/opsi/package-updater.repos.d/opsi-server.repo
+			$VERBOSE && echo ".OK"
+		fi
+
+		rm -f "/tmp/opsi.configure.package.updater"
+	fi
+else
+	if [ "$OPSI_ROLE" = "depotserver" ]; then
+		$VERBOSE && echo "Automatic Registration of Server as opsi-Depotserver could not be done, because serverole: $SERVER_ROLE was detected, please execute opsi-setup --register-depot after installation."
+	fi
+
+	set +e
+	$VERBOSE && echo -n "Check for opsi fileadmingroup:"
+	count=0
+	while [ $count -le 600 ]; do
+		getent group "$fileadmingroup" >/dev/null 2>/dev/null && break
+		$VERBOSE && echo -n "."
+		# restart samba-ad-dc every 200 seconds
+		if [ "$count" = 200 ] || [ "$count" = 400 ]; then
+			if is_ucr_true nss/group/cachefile && test -e /usr/lib/univention-pam/ldap-group-to-file.py; then
+				python /usr/lib/univention-pam/ldap-group-to-file.py >/dev/null 2>/dev/null || true
+			else
+				nscd -i group
+			fi
+		fi
+		sleep 1
+		count=$((count+1))
+	done
+	$VERBOSE && echo "OK"
+	set -e
+
+	if [ "$OPSI_ROLE" = "configserver" ]; then
+		set +e
+		if [ -e /tmp/update_backends.opsi4ucs ]; then
+			UPDATE_BACKENDS=true
+			rm /tmp/update_backends.opsi4ucs
+		else
+			UPDATE_BACKENDS=false
+		fi
+
+		MYSQL_CONFIGURED=$(egrep -v "^#" /etc/opsi/backendManager/dispatch.conf | grep mysql)
+		if [ -n "$MYSQL_CONFIGURED" ]; then
+			$VERBOSE && echo "mysql configured in dispatch.conf."
+
+			# Python snippet to check the configuration by...
+			# * loading config
+			# * extracting required connection information
+			# * trying to connect
+			python -c "import MySQLdb; from OPSI.Util.Task.ConfigureBackend import getBackendConfiguration; config = getBackendConfiguration('/etc/opsi/backends/mysql.conf'); connectionSettings = {'host': config['address'], 'user': config['username'], 'passwd': config['password'], 'db': config['database']}; MySQLdb.connect(**connectionSettings)" &>/dev/null
+			MYSQL_ALREADY_CONFIGURED=$?
+
+			if [ $MYSQL_ALREADY_CONFIGURED -ne 0 ]; then
+				$VERBOSE && echo "Unable to connect to MySQL."
+				if [ -e "/etc/mysql.secret" ]; then
+					MYSQL_PW=$(cat "/etc/mysql.secret")
+
+					$VERBOSE && echo "Attempting automatic configuration for MySQL backend..."
+					UNATTENDED="{\"dbAdminPass\": \"$MYSQL_PW\", \"dbAdminUser\": \"root\", \"database\": \"opsi\"}"
+					opsi-setup --configure-mysql --unattended=$UNATTENDED || echo "unattended backend configuration failed!"
+					$VERBOSE && echo "Finished setting up MySQL backend."
+
+					# not keeping the password around.
+					unset MYSQL_PW
+				else
+					$VERBOSE && echo "WARNING: mysql configured in dispatch.conf but not properly configured!"
+					$VERBOSE && echo "WARNING: No automatic configuration possible - is univention-mariadb or univention-mysql installed?"
+				fi
+			else
+				$VERBOSE && echo "MySQL connection possible."
+				$UPDATE_BACKENDS && opsi-setup --update-mysql
+			fi
+		fi
+
+		FILE_BACKEND_CONFIGURED=$(egrep -v "^#" /etc/opsi/backendManager/dispatch.conf | grep file)
+		if [ -n "$FILE_BACKEND_CONFIGURED" ]; then
+			$UPDATE_BACKENDS && opsi-setup --update-file
+		fi
+		set -e
+	fi
+
+	opsi-setup --init-current-config
+	opsi-setup --set-rights
+fi
+
+if [ -e "/tmp/opsi.packages.install" ]; then
+	echo "Installing opsi products - this may take a while..."
+	opsi-package-updater -v install || echo "Installing opsi products failed. Please fix the problem and then run \"opsi-package-updater -v install\" manually."
+	rm -f /tmp/opsi.packages.install
+else
+	if [ -e "/tmp/opsi.packages.update" ]; then
+		echo "Updating opsi products - this may take a while..."
+		opsi-package-updater -v update || echo "Updating opsi products failed. Please fix the problem and then run \"opsi-package-updater -v update\" manually."
+		rm -f /tmp/opsi.packages.update
+	fi
+fi
+
+# --- Commit changes ------------------------------------------------------------------------------------------------------------
+$VERBOSE && echo "Removing old opsi links on the UCS overview page"
+ucr unset ucs/web/overview/entries/admin/opsi-configed/description/de
+ucr unset ucs/web/overview/entries/admin/opsi-configed/description
+ucr unset ucs/web/overview/entries/admin/opsi-configed/icon
+ucr unset ucs/web/overview/entries/admin/opsi-configed/label/de
+ucr unset ucs/web/overview/entries/admin/opsi-configed/label
+ucr unset ucs/web/overview/entries/admin/opsi-configed/link
+ucr unset ucs/web/overview/entries/admin/opsi-configed/priority
+
+$VERBOSE && echo "Adding links to the UCS overview page"
+ucr set ucs/web/overview/entries/admin/opsi-server/description/de='opsi-Server Übersichts-Seite'
+ucr set ucs/web/overview/entries/admin/opsi-server/description='opsi server overview page'
+ucr set ucs/web/overview/entries/admin/opsi-server/icon="/icon/50x50/opsi-configed.png"
+ucr set ucs/web/overview/entries/admin/opsi-server/label/de='opsi Server'
+ucr set ucs/web/overview/entries/admin/opsi-server/label='opsi server'
+ucr set ucs/web/overview/entries/admin/opsi-server/link="https://${FQDN}:4447/"
+ucr set ucs/web/overview/entries/admin/opsi-server/priority=50
+
+# dpkg-reconfigure opsiconfd
+
+$VERBOSE && echo "Restarting services"
+if [ $DHCPSERVER = "1" ]; then
+	/usr/sbin/service univention-dhcp restart || true
+fi
+systemctl reload smbd.service || true
+/usr/sbin/service opsiconfd restart || true
+/usr/sbin/service opsipxeconfd restart || true
+
+joinscript_save_current_version
+
+exit 0
