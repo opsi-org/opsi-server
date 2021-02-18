@@ -410,6 +410,12 @@ ucr set security/packetfilter/package/opsi4ucs/udp/69/all=ACCEPT
 ucr set security/packetfilter/package/opsi4ucs/tcp/4447/all/en="Port for opsi-Webservice"
 ucr set security/packetfilter/package/opsi4ucs/udp/69/all/en="Port for TFTPD"
 
+# grafana port
+if [ $(dpkg-query -W -f='${Status}' nano 2>/dev/null | grep -c "ok installed") -eq 1 ]; then
+	ucr set security/packetfilter/package/opsi4ucs/tcp/3000/all=ACCEPT
+	ucr set security/packetfilter/package/opsi4ucs/tcp/4447/all/en="Port for grafana"
+fi
+
 $VERBOSE && echo "Cleanup old opsi local-Filterrules"
 
 TEMPFILE=$(tempfile)
