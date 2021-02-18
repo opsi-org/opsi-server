@@ -421,22 +421,22 @@ cat $TEMPFILE > /etc/security/packetfilter.d/50_local.sh
 if [ -e "/etc/univention/ssl/$FQDN/cert.pem" -a -e "/etc/univention/ssl/$FQDN/private.key" ]; then
 	$VERBOSE && echo "Creating opsiconfd.pem"
 
-	cat /etc/univention/ssl/$FQDN/private.key > /etc/opsi/opsiconfd.pem
-	grep -A 50 "BEGIN CERTIFICATE" /etc/univention/ssl/$FQDN/cert.pem >> /etc/opsi/opsiconfd.pem
-	chmod 600 /etc/opsi/opsiconfd.pem
-	chown opsiconfd:root /etc/opsi/opsiconfd.pem || true
+	cat /etc/univention/ssl/$FQDN/private.key > /etc/opsi/ssl/opsiconfd.pem
+	grep -A 50 "BEGIN CERTIFICATE" /etc/univention/ssl/$FQDN/cert.pem >> /etc/opsi/ssl/opsiconfd.pem
+	chmod 600 /etc/opsi/ssl/opsiconfd.pem
+	chown opsiconfd:root /etc/opsi/ssl/opsiconfd.pem || true
 else
 	if [ -e "/etc/univention/ssl/$HOSTNAME/cert.pem" -a -e "/etc/univention/ssl/$HOSTNAME/private.key" ]; then
 		# This is a fallback if the foldername is != FQDN
 		$VERBOSE && echo "Creating opsiconfd.pem"
 
-		cat /etc/univention/ssl/$HOSTNAME/private.key > /etc/opsi/opsiconfd.pem
-		grep -A 50 "BEGIN CERTIFICATE" /etc/univention/ssl/$HOSTNAME/cert.pem >> /etc/opsi/opsiconfd.pem
-		chmod 600 /etc/opsi/opsiconfd.pem
-		chown opsiconfd:root /etc/opsi/opsiconfd.pem || true
+		cat /etc/univention/ssl/$HOSTNAME/private.key > /etc/opsi/ssl/opsiconfd.pem
+		grep -A 50 "BEGIN CERTIFICATE" /etc/univention/ssl/$HOSTNAME/cert.pem >> /etc/opsi/ssl/opsiconfd.pem
+		chmod 600 /etc/opsi/ssl/opsiconfd.pem
+		chown opsiconfd:root /etc/opsi/ssl/opsiconfd.pem || true
 	else
-		if [ ! -e "/etc/opsi/opsiconfd.pem" ]; then
-			$VERBOSE && echo "WARNING: Unable to automatically create opsiconfd.pem! You need to create /etc/opsi/opsiconfd.pem manually!"
+		if [ ! -e "/etc/opsi/ssl/opsiconfd.pem" ]; then
+			$VERBOSE && echo "WARNING: Unable to automatically create opsiconfd.pem! You need to create /etc/opsi/ssl/opsiconfd.pem manually!"
 		fi
 	fi
 fi
@@ -577,6 +577,7 @@ ucr set ucs/web/overview/entries/admin/opsi-server/link="https://${FQDN}:4447/"
 ucr set ucs/web/overview/entries/admin/opsi-server/priority=50
 
 # dpkg-reconfigure opsiconfd
+opsiconfd setup
 
 $VERBOSE && echo "Restarting services"
 if [ $DHCPSERVER = "1" ]; then
