@@ -411,9 +411,9 @@ ucr set security/packetfilter/package/opsi4ucs/tcp/4447/all/en="Port for opsi-We
 ucr set security/packetfilter/package/opsi4ucs/udp/69/all/en="Port for TFTPD"
 
 # grafana port
-if [ $(dpkg-query -W -f='${Status}' nano 2>/dev/null | grep -c "ok installed") -eq 1 ]; then
+if [ $(dpkg-query -W -f='${Status}' grafana 2>/dev/null | grep -c "ok installed") -eq 1 ]; then
 	ucr set security/packetfilter/package/opsi4ucs/tcp/3000/all=ACCEPT
-	ucr set security/packetfilter/package/opsi4ucs/tcp/4447/all/en="Port for grafana"
+	ucr set security/packetfilter/package/opsi4ucs/tcp/3000/all/en="Port for grafana"
 fi
 
 $VERBOSE && echo "Cleanup old opsi local-Filterrules"
@@ -576,13 +576,12 @@ ucr unset ucs/web/overview/entries/admin/opsi-configed/priority
 $VERBOSE && echo "Adding links to the UCS overview page"
 ucr set ucs/web/overview/entries/admin/opsi-server/description/de='opsi-Server Übersichts-Seite'
 ucr set ucs/web/overview/entries/admin/opsi-server/description='opsi server overview page'
-ucr set ucs/web/overview/entries/admin/opsi-server/icon="/icon/50x50/opsi-configed.png"
+ucr set ucs/web/overview/entries/admin/opsi-server/icon="/icon/50x50/opsi-icon.png"
 ucr set ucs/web/overview/entries/admin/opsi-server/label/de='opsi Server'
 ucr set ucs/web/overview/entries/admin/opsi-server/label='opsi server'
 ucr set ucs/web/overview/entries/admin/opsi-server/link="https://${FQDN}:4447/"
 ucr set ucs/web/overview/entries/admin/opsi-server/priority=50
 
-# dpkg-reconfigure opsiconfd
 opsiconfd setup
 
 $VERBOSE && echo "Restarting services"
