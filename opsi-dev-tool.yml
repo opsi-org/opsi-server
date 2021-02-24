@@ -14,6 +14,13 @@ postinst_script: &postinst_script |
       [ -e /usr/lib/univention-install/99opsi4ucs.inst ] || ln -sf /usr/share/opsi-server/ucs/ucs-join-script.inst /usr/lib/univention-install/99opsi4ucs.inst
       . /usr/share/univention-lib/base.sh
       call_joinscript 99opsi4ucs.inst
+      if [ -d "/var/www/" ]; then
+        mkdir -p /var/www/icon/50x50
+        if [ -e "/usr/share/opsi-server/ucs/opsi-logo.png" ]; then
+          cp /usr/share/opsi-server/ucs/opsi-logo.png /var/www/icon/50x50/
+          chmod 644 /var/www/icon/50x50/opsi-logo.png
+        fi
+      fi
   else
     if grep "^fileadmingroup *= *opsifileadmins$" /etc/opsi/opsi.conf >/dev/null; then
       if ! getent group opsifileadmins >/dev/null; then
