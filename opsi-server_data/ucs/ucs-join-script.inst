@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=48
+VERSION=49
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -576,7 +576,7 @@ ucr unset ucs/web/overview/entries/admin/opsi-configed/priority
 $VERBOSE && echo "Adding links to the UCS overview page"
 ucr set ucs/web/overview/entries/admin/opsi-server/description/de='opsi-Server Übersichts-Seite'
 ucr set ucs/web/overview/entries/admin/opsi-server/description='opsi server overview page'
-ucr set ucs/web/overview/entries/admin/opsi-server/icon="/icon/50x50/opsi-icon.png"
+ucr set ucs/web/overview/entries/admin/opsi-server/icon="/icon/50x50/opsi-logo.png"
 ucr set ucs/web/overview/entries/admin/opsi-server/label/de='opsi Server'
 ucr set ucs/web/overview/entries/admin/opsi-server/label='opsi server'
 ucr set ucs/web/overview/entries/admin/opsi-server/link="https://${FQDN}:4447/"
