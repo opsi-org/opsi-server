@@ -424,28 +424,6 @@ grep -v "dport 69"  /etc/security/packetfilter.d/50_local.sh | grep  -v "dport 4
 cat $TEMPFILE > /etc/security/packetfilter.d/50_local.sh
 /usr/sbin/service univention-firewall restart
 
-if [ -e "/etc/univention/ssl/$FQDN/cert.pem" -a -e "/etc/univention/ssl/$FQDN/private.key" ]; then
-	$VERBOSE && echo "Creating opsiconfd.pem"
-
-	cat /etc/univention/ssl/$FQDN/private.key > /etc/opsi/ssl/opsiconfd.pem
-	grep -A 50 "BEGIN CERTIFICATE" /etc/univention/ssl/$FQDN/cert.pem >> /etc/opsi/ssl/opsiconfd.pem
-	chmod 600 /etc/opsi/ssl/opsiconfd.pem
-	chown opsiconfd:root /etc/opsi/ssl/opsiconfd.pem || true
-else
-	if [ -e "/etc/univention/ssl/$HOSTNAME/cert.pem" -a -e "/etc/univention/ssl/$HOSTNAME/private.key" ]; then
-		# This is a fallback if the foldername is != FQDN
-		$VERBOSE && echo "Creating opsiconfd.pem"
-
-		cat /etc/univention/ssl/$HOSTNAME/private.key > /etc/opsi/ssl/opsiconfd.pem
-		grep -A 50 "BEGIN CERTIFICATE" /etc/univention/ssl/$HOSTNAME/cert.pem >> /etc/opsi/ssl/opsiconfd.pem
-		chmod 600 /etc/opsi/ssl/opsiconfd.pem
-		chown opsiconfd:root /etc/opsi/ssl/opsiconfd.pem || true
-	else
-		if [ ! -e "/etc/opsi/ssl/opsiconfd.pem" ]; then
-			$VERBOSE && echo "WARNING: Unable to automatically create opsiconfd.pem! You need to create /etc/opsi/ssl/opsiconfd.pem manually!"
-		fi
-	fi
-fi
 
 if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master" -a "$SERVER_ROLE" != "domaincontroller_backup" ]; then
 	ln -sf /etc/opsi/backendManager/dispatch.conf.jsonrpc /etc/opsi/backendManager/dispatch.conf
