@@ -259,7 +259,7 @@ userdel pcpatch >/dev/null 2>/dev/null || true
 userdel opsiconfd >/dev/null 2>/dev/null || true
 [ -e /tmp/.group.tmp.opsi4ucs ] && rm /tmp/.group.tmp.opsi4ucs
 cp /etc/group /tmp/.group.tmp.opsi4ucs
-cat /tmp/.group.tmp.opsi4ucs | grep -v '^pcpatch:' | grep -v '^opsiadmin:' | grep -v '^opsiconfd' >/etc/group || true
+cat /tmp/.group.tmp.opsi4ucs | grep -v '^pcpatch:' | grep -v '^opsiadmin:' | grep -v '^opsiconfd' | grep -v "^$fileadmingroup" >/etc/group || true
 rm /tmp/.group.tmp.opsi4ucs
 
 
@@ -559,8 +559,6 @@ ucr set ucs/web/overview/entries/admin/opsi-server/label/de='opsi Server'
 ucr set ucs/web/overview/entries/admin/opsi-server/label='opsi server'
 ucr set ucs/web/overview/entries/admin/opsi-server/link="https://${FQDN}:4447/"
 ucr set ucs/web/overview/entries/admin/opsi-server/priority=50
-
-opsiconfd setup
 
 $VERBOSE && echo "Restarting services"
 if [ $DHCPSERVER = "1" ]; then
