@@ -113,7 +113,7 @@ package:
         - samba
         - sudo
         - wget
-        - mysql-server | mariadb-server
+        - univention-mariadb | univention-mysql | mariadb-server | mysql-server
         - redis-server (>= 6.0)
         - redis-timeseries
         - opsi-windows-support
