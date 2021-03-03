@@ -70,6 +70,7 @@ package:
     - python-opsi (<< 4.2)
   replaces:
     - opsi-depotserver (<< 4.1)
+    - opsi4ucs
   source_script: |
     mkdir -p "${DST}/rootfs/var/lib/opsi/depot"
     mkdir -p "${DST}/rootfs/var/lib/opsi/ntfs-images"
@@ -103,6 +104,7 @@ package:
         - python-opsi (<< 4.2)
       replaces:
         - opsi-depotserver-expert
+        - opsi4ucs
     - name: full
       depends:
         - opsiconfd (>= 4.2)
@@ -126,6 +128,8 @@ package:
         - opsi-server
         - opsi-server-expert
         - python-opsi (<< 4.2)
+      replaces:
+        - opsi4ucs
       postinst_script:
         - |
           systemctl daemon-reload || true
