@@ -8,24 +8,39 @@ project:
   maintainer: uib GmbH <info@uib.de>
 
 postinst_script: &postinst_script |
-  if grep "^fileadmingroup *= *opsifileadmins$" /etc/opsi/opsi.conf >/dev/null; then
-    if ! getent group opsifileadmins >/dev/null; then
-      if getent group pcpatch >/dev/null; then
-        sed -i s"/^fileadmingroup.*/fileadmingroup = pcpatch/" /etc/opsi/opsi.conf
+  if [ "$(lsb_release -si)"  == "Univention" ]; then
+      echo "UCS"
+      if [ -d "/var/www/" ]; then
+        mkdir -p /var/www/icon/50x50
+        if [ -e "/usr/share/opsi-server/ucs/opsi-logo.png" ]; then
+          cp /usr/share/opsi-server/ucs/opsi-logo.png /var/www/icon/50x50/
+          chmod 644 /var/www/icon/50x50/opsi-logo.png
+        fi
+      fi
+      [ -f /usr/lib/univention-install/99opsi4ucs.inst -a ! -L /usr/lib/univention-install/99opsi4ucs.inst ] && rm /usr/lib/univention-install/99opsi4ucs.inst
+      [ -e /usr/lib/univention-install/99opsi4ucs.inst ] || ln -sf /usr/share/opsi-server/ucs/ucs-join-script.inst /usr/lib/univention-install/99opsi4ucs.inst
+      . /usr/share/univention-lib/base.sh
+      call_joinscript 99opsi4ucs.inst
+      /usr/bin/opsiconfd setup --log-level-stderr=5 --log-level-file=0 || true
+  else
+    if grep "^fileadmingroup *= *opsifileadmins$" /etc/opsi/opsi.conf >/dev/null; then
+      if ! getent group opsifileadmins >/dev/null; then
+        if getent group pcpatch >/dev/null; then
+          sed -i s"/^fileadmingroup.*/fileadmingroup = pcpatch/" /etc/opsi/opsi.conf
+        fi
       fi
     fi
+    # Setup
+    /usr/bin/opsiconfd setup --log-level-stderr=5 --log-level-file=0 || true
+    opsi-setup --set-rights /etc || true
+    [ -e /etc/dhcpd.conf ] && sed -i s'#"dhcpdConfigFile".*#"dhcpdConfigFile":         u"/etc/dhcpd.conf",#' /etc/opsi/backends/dhcpd.conf
+    [ -e /etc/dhcpd.conf ] && sed -i s'#linux/pxelinux.0#opsi/pxelinux.0#' /etc/opsi/backends/dhcpd.conf
+    [ -e /var/lib/tftpboot/opsi ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf
   fi
   [ -e /var/lib/opsi/server_commands_custom.conf ] || touch /var/lib/opsi/server_commands_custom.conf
+  opsi-setup --set-rights /var/lib/opsi/server_commands_custom.conf || true
   # Removing files dating before opsi 4.1
   [ -e /etc/opsi/version ] && rm /etc/opsi/version
-  # Setup
-  /usr/bin/opsiconfd setup --log-level-stderr=5 --log-level-file=0 || true
-  opsi-setup --set-rights /var/lib/opsi/server_commands_custom.conf || true
-  opsi-setup --set-rights /etc || true
-  [ -e /etc/dhcpd.conf ] && sed -i s'#"dhcpdConfigFile".*#"dhcpdConfigFile":         u"/etc/dhcpd.conf",#' /etc/opsi/backends/dhcpd.conf
-  [ -e /etc/dhcpd.conf ] && sed -i s'#linux/pxelinux.0#opsi/pxelinux.0#' /etc/opsi/backends/dhcpd.conf
-  [ -e /var/lib/tftpboot/opsi ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf
-
 package:
   name: opsi-server
   type: binary
@@ -55,6 +70,7 @@ package:
     - python-opsi (<< 4.2)
   replaces:
     - opsi-depotserver (<< 4.1)
+    - opsi4ucs
   source_script: |
     mkdir -p "${DST}/rootfs/var/lib/opsi/depot"
     mkdir -p "${DST}/rootfs/var/lib/opsi/ntfs-images"
@@ -66,6 +82,8 @@ package:
     mkdir -p "${DST}/rootfs/var/log/opsi/userlogin"
     mkdir -p "${DST}/rootfs/etc"
     cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc/opsi"
+    mkdir -p "${DST}/rootfs/usr/share/opsi-server"
+    cp -a "${SRC}/opsi-server_data/ucs" "${DST}/rootfs/usr/share/opsi-server/"
   postinst_script:
     - *postinst_script
     - exit 0
@@ -86,6 +104,7 @@ package:
         - python-opsi (<< 4.2)
       replaces:
         - opsi-depotserver-expert
+        - opsi4ucs
     - name: full
       depends:
         - opsiconfd (>= 4.2)
@@ -96,7 +115,7 @@ package:
         - samba
         - sudo
         - wget
-        - mysql-server | mariadb-server
+        - univention-mariadb | univention-mysql | mariadb-server | mysql-server
         - redis-server (>= 6.0)
         - redis-timeseries
         - opsi-windows-support
@@ -109,6 +128,8 @@ package:
         - opsi-server
         - opsi-server-expert
         - python-opsi (<< 4.2)
+      replaces:
+        - opsi4ucs
       postinst_script:
         - |
           systemctl daemon-reload || true
@@ -120,10 +141,12 @@ package:
           systemctl start redis-server || true
           systemctl enable grafana-server || true
           systemctl start grafana-server || true
-          update-inetd --remove tftp 2>/dev/null || true
-          grep opsi_depot /etc/samba/smb.conf >/dev/null 2>&1 || opsi-setup --auto-configure-samba || true
-          for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
-          for i in nmb nmbd smb smbd; do systemctl restart $i 2>/dev/null || true; done
-          opsi-setup --auto-configure-dhcpd 2>/dev/null || true
+          if [ "$(lsb_release -si)"  != "Univention" ]; then
+            update-inetd --remove tftp 2>/dev/null || true
+            grep opsi_depot /etc/samba/smb.conf >/dev/null 2>&1 || opsi-setup --auto-configure-samba || true
+            for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
+            for i in nmb nmbd smb smbd; do systemctl restart $i 2>/dev/null || true; done
+            opsi-setup --auto-configure-dhcpd 2>/dev/null || true
+          fi
         - *postinst_script
         - exit 0
