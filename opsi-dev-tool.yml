@@ -17,8 +17,7 @@ postinst_script: &postinst_script |
           chmod 644 /var/www/icon/50x50/opsi-logo.png
         fi
       fi
-      [ -f /usr/lib/univention-install/99opsi4ucs.inst -a ! -L /usr/lib/univention-install/99opsi4ucs.inst ] && rm /usr/lib/univention-install/99opsi4ucs.inst
-      [ -e /usr/lib/univention-install/99opsi4ucs.inst ] || ln -sf /usr/share/opsi-server/ucs/ucs-join-script.inst /usr/lib/univention-install/99opsi4ucs.inst
+      cp /usr/share/opsi-server/ucs/ucs-join-script.inst /usr/lib/univention-install/99opsi4ucs.inst
       . /usr/share/univention-lib/base.sh
       call_joinscript 99opsi4ucs.inst
       cp /usr/share/opsi-server/ucs/opsi-auth /etc/pam.d/opsi-auth
