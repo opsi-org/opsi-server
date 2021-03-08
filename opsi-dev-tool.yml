@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.40
+  version: 4.2.0.41
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -71,6 +71,7 @@ package:
     - opsi-server-expert
     - opsi-server-full
     - python-opsi (<< 4.2)
+    - opsi4ucs
   replaces:
     - opsi-depotserver (<< 4.1)
     - opsi4ucs
@@ -105,6 +106,7 @@ package:
         - opsi-server
         - opsi-server-full
         - python-opsi (<< 4.2)
+        - opsi4ucs
       replaces:
         - opsi-depotserver-expert
         - opsi4ucs
@@ -131,6 +133,7 @@ package:
         - opsi-server
         - opsi-server-expert
         - python-opsi (<< 4.2)
+        - opsi4ucs
       replaces:
         - opsi4ucs
       postinst_script:
