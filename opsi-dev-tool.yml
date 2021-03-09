@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.41
+  version: 4.2.0.42
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -65,16 +65,17 @@ package:
     - opsi-linux-support
   provides:
     - opsi-depotserver (= 4.2)
+    - opsi4ucs (= 4.2)
   breaks:
-    - opsi-depotserver (<< 4.1)
+    - opsi-depotserver (<< 4.2)
+    - opsi4ucs (<< 4.2)
   conflicts:
     - opsi-server-expert
     - opsi-server-full
     - python-opsi (<< 4.2)
-    - opsi4ucs
   replaces:
-    - opsi-depotserver (<< 4.1)
-    - opsi4ucs
+    - opsi-depotserver (<< 4.2)
+    - opsi4ucs (<< 4.2)
   source_script: |
     mkdir -p "${DST}/rootfs/var/lib/opsi/depot"
     mkdir -p "${DST}/rootfs/var/lib/opsi/ntfs-images"
