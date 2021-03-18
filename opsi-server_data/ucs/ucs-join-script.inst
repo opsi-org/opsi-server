@@ -428,7 +428,7 @@ cat $TEMPFILE > /etc/security/packetfilter.d/50_local.sh
 if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master" -a "$SERVER_ROLE" != "domaincontroller_backup" ]; then
 	$VERBOSE && echo "Registering Server as OpsiDepotserver on $config_server"
 	credentials="$@"
-	opsi_username=${@:2:1}
+	opsi_username=$(echo ${@:2:1} | awk -F "[=,]" '$1 == "uid" {print $2}')
 	opsi_password=${@:4:1}
 	$VERBOSE && echo "$@"
 	$VERBOSE && echo "username $opsi_username"
