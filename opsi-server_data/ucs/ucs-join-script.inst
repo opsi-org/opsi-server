@@ -430,9 +430,6 @@ if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master"
 	credentials="$@"
 	opsi_username=$(echo ${@:2:1} | awk -F "[=,]" '$1 == "uid" {print $2}')
 	opsi_password=${@:4:1}
-	$VERBOSE && echo "$@"
-	$VERBOSE && echo "username $opsi_username"
-	$VERBOSE && echo "password $opsi_password"
 	opsi-setup --register-depot -l5 --unattended "{\"address\": \"$config_server\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\"}"
 
 
