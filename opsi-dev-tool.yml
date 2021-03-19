@@ -118,7 +118,7 @@ package:
         - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
         - opsi-utils (>= 4.2)
-        - samba
+        - univention-samba | samba
         - sudo
         - wget
         - univention-mariadb | univention-mysql | mariadb-server | mysql-server
