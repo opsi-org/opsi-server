@@ -426,10 +426,12 @@ cat $TEMPFILE > /etc/security/packetfilter.d/50_local.sh
 
 
 if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master" -a "$SERVER_ROLE" != "domaincontroller_backup" ]; then
-	ln -sf /etc/opsi/backendManager/dispatch.conf.jsonrpc /etc/opsi/backendManager/dispatch.conf
 	$VERBOSE && echo "Registering Server as OpsiDepotserver on $config_server"
 	credentials="$@"
-	opsi-setup --register-depot -l5 --binddata "--configserver $config_server $credentials"
+	opsi_username=$(echo ${@:2:1} | awk -F "[=,]" '$1 == "uid" {print $2}')
+	opsi_password=${@:4:1}
+	opsi-setup --register-depot -l5 --unattended "{\"address\": \"$config_server\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\"}"
+
 
 	if [ -e "/tmp/opsi.configure.package.updater" ]; then
 		# We shall configure opsi-package-updater to retrieve packages from
