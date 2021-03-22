@@ -157,3 +157,5 @@ package:
           fi
         - *postinst_script
         - exit 0
+      postrm_script: |
+        [ -d /usr/share/opsi-server ] && rm -r /usr/share/opsi-server
