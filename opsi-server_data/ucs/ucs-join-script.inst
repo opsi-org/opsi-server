@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=49
+VERSION=50
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -542,6 +542,12 @@ else
 		rm -f /tmp/opsi.packages.update
 	fi
 fi
+
+# --- Register templates
+cp /usr/share/opsi-server/ucs/opsi-auth /etc/univention/templates/files/etc/pam.d/opsi-auth
+cp /usr/share/opsi-server/ucs/opsi.univention-config-registry /etc/univention/templates/info/opsi.info
+ucr register opsi
+ucr commit /etc/pam.d/opsi-auth
 
 # --- Commit changes ------------------------------------------------------------------------------------------------------------
 $VERBOSE && echo "Removing old opsi links on the UCS overview page"
