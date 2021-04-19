@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.47
+  version: 4.2.0.48
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
