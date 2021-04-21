@@ -528,10 +528,11 @@ else
 		fi
 		set -e
 	fi
-
 	opsi-setup --init-current-config
-	opsi-setup --set-rights
 fi
+
+echo "Setting rights - this may take a while..."
+opsi-setup --set-rights
 
 if [ -e "/tmp/opsi.packages.install" ]; then
 	echo "Installing opsi products - this may take a while..."
