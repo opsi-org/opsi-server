@@ -1,10 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.46
-  description: opsi server
-  homepage: http://www.opsi.org
   licenses:
-    - license: AGPL-3.0
   maintainer: uib GmbH <info@uib.de>
 
 postinst_script: &postinst_script |
@@ -153,5 +149,3 @@ package:
           fi
         - *postinst_script
         - exit 0
-      postrm_script: |
-        [ -d /usr/share/opsi-server ] && rm -r /usr/share/opsi-server
