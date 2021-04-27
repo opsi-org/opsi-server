@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.45
+  version: 4.2.0.46
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -45,11 +45,11 @@ package:
   type: binary
   architecture: all
   depends:
-    - opsiconfd (>= 4.2)
+    - opsiconfd (>= 4.2.0.161)
     - opsipxeconfd (>= 4.2)
     - opsi-linux-bootimage (>= 20200824)
     - opsi-tftpd-hpa | opsi-tftp-hpa-server
-    - opsi-utils (>= 4.2)
+    - opsi-utils (>= 4.2.0.91)
     - samba
     - sudo
     - wget
@@ -91,11 +91,11 @@ package:
   subpackages:
     - name: expert
       depends:
-        - opsiconfd (>= 4.2)
+        - opsiconfd (>= 4.2.0.161)
         - opsipxeconfd (>= 4.2)
         - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
-        - opsi-utils (>= 4.2)
+        - opsi-utils (>= 4.2.0.91)
       provides:
         - opsi-server (= 4.2)
         - opsi-depotserver (= 4.2)
@@ -109,11 +109,11 @@ package:
         - opsi4ucs
     - name: full
       depends:
-        - opsiconfd (>= 4.2)
+        - opsiconfd (>= 4.2.0.161)
         - opsipxeconfd (>= 4.2)
         - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
-        - opsi-utils (>= 4.2)
+        - opsi-utils (>= 4.2.0.91)
         - univention-samba | samba
         - sudo
         - wget
