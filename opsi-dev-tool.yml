@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.51
+  version: 4.2.0.52
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -145,8 +145,12 @@ package:
           systemctl enable redis-server || true
           systemctl start redis-server || true
           systemctl enable grafana-server || true
-          unzip -o /usr/share/opsi-server/grafana/plugins/grafana-simple-json-datasource.zip -d /var/lib/grafana/plugins/ || true
-          mv /var/lib/grafana/plugins/grafana-simple-json-datasource* /var/lib/grafana/plugins/grafana-simple-json-datasource || true
+          if [ ! -e "/var/lib/grafana/plugins/grafana-simple-json-datasource" ]; then
+            unzip /usr/share/opsi-server/grafana/plugins/grafana-simple-json-datasource.zip -d /var/lib/grafana/plugins/ || true
+            mv /var/lib/grafana/plugins/grafana-simple-json-datasource* /var/lib/grafana/plugins/grafana-simple-json-datasource || true
+            chown grafana:grafana -R /var/lib/grafana/plugins/grafana-simple-json-datasource
+            chmod u=rwX,g=rX,o=rX -R /var/lib/grafana/plugins/grafana-simple-json-datasource
+          fi
           systemctl start grafana-server || true
           if [ "$(lsb_release -si)"  != "Univention" ]; then
             update-inetd --remove tftp 2>/dev/null || true
