@@ -85,6 +85,7 @@ package:
     cp -a "${SRC}/opsi-server_data/etc" "${DST}/rootfs/etc/opsi"
     mkdir -p "${DST}/rootfs/usr/share/opsi-server"
     cp -a "${SRC}/opsi-server_data/ucs" "${DST}/rootfs/usr/share/opsi-server/"
+    cp -a "${SRC}/opsi-server_data/grafana" "${DST}/rootfs/usr/share/opsi-server/"
   postinst_script:
     - *postinst_script
     - exit 0
@@ -117,6 +118,7 @@ package:
         - univention-samba | samba
         - sudo
         - wget
+        - unzip
         - univention-mariadb | univention-mysql | mariadb-server | mysql-server
         - redis-server (>= 6.0)
         - redis-timeseries
@@ -143,6 +145,8 @@ package:
           systemctl enable redis-server || true
           systemctl start redis-server || true
           systemctl enable grafana-server || true
+          unzip -o /usr/share/opsi-server/grafana/plugins/grafana-simple-json-datasource.zip -d /var/lib/grafana/plugins/ || true
+          mv /var/lib/grafana/plugins/grafana-simple-json-datasource* /var/lib/grafana/plugins/grafana-simple-json-datasource || true
           systemctl start grafana-server || true
           if [ "$(lsb_release -si)"  != "Univention" ]; then
             update-inetd --remove tftp 2>/dev/null || true
