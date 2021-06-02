@@ -77,6 +77,7 @@ package:
     mkdir -p "${DST}/rootfs/var/lib/opsi/ntfs-images"
     mkdir -p "${DST}/rootfs/var/lib/opsi/repository"
     mkdir -p "${DST}/rootfs/var/lib/opsi/workbench"
+    mkdir -p "${DST}/rootfs/var/lib/opsi/public"
     mkdir -p "${DST}/rootfs/var/log/opsi/bootimage"
     mkdir -p "${DST}/rootfs/var/log/opsi/clientconnect"
     mkdir -p "${DST}/rootfs/var/log/opsi/instlog"
