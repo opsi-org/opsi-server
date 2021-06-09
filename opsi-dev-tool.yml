@@ -44,6 +44,8 @@ package:
   name: opsi-server
   type: binary
   architecture: all
+  build_depends:
+    - unzip
   depends:
     - opsiconfd (>= 4.2.0.161)
     - opsipxeconfd (>= 4.2)
