@@ -110,6 +110,8 @@ package:
         - opsi-depotserver-expert
         - opsi4ucs
     - name: full
+      build_depends:
+        - unzip
       depends:
         - opsiconfd (>= 4.2.0.161)
         - opsipxeconfd (>= 4.2)
@@ -147,6 +149,7 @@ package:
           systemctl start redis-server || true
           systemctl enable grafana-server || true
           if [ ! -e "/var/lib/grafana/plugins/grafana-simple-json-datasource" ]; then
+            mkdir -p /var/lib/grafana/plugins
             unzip -q /usr/share/opsi-server/grafana/plugins/grafana-simple-json-datasource.zip -d /var/lib/grafana/plugins/ || true
             mv /var/lib/grafana/plugins/grafana-simple-json-datasource* /var/lib/grafana/plugins/grafana-simple-json-datasource || true
             chown grafana:grafana -R /var/lib/grafana/plugins/grafana-simple-json-datasource
