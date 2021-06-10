@@ -156,6 +156,7 @@ package:
             unzip -q /usr/share/opsi-server/grafana/grafana-simple-json-datasource.zip -d /var/lib/grafana/plugins/ || true
             chown grafana:grafana -R /var/lib/grafana/plugins/grafana-simple-json-datasource
             chmod u=rwX,g=rX,o=rX -R /var/lib/grafana/plugins/grafana-simple-json-datasource
+            systemctl restart grafana-server || true
           fi
           systemctl start grafana-server || true
           if [ "$(lsb_release -si)"  != "Univention" ]; then
