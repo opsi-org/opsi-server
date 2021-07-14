@@ -546,7 +546,7 @@ else
 	fi
 fi
 
-# --- Register templates
+# --- Register templates ------------------------------------------------------------------------------------------------------------
 cp /usr/share/opsi-server/ucs/opsi-auth /etc/univention/templates/files/etc/pam.d/opsi-auth
 cp /usr/share/opsi-server/ucs/opsi.univention-config-registry /etc/univention/templates/info/opsi.info
 ucr register opsi
