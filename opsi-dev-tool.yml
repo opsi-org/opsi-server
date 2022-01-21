@@ -48,7 +48,7 @@ package:
     - unzip
   depends:
     - opsiconfd (>= 4.2.0.228)
-    - opsipxeconfd (>= 4.2)
+    - opsipxeconfd (>= 4.2.0.23)
     - opsi-linux-bootimage (>= 20200824)
     - opsi-tftpd-hpa | opsi-tftp-hpa-server
     - opsi-utils (>= 4.2.0.149)
@@ -96,7 +96,7 @@ package:
     - name: expert
       depends:
         - opsiconfd (>= 4.2.0.228)
-        - opsipxeconfd (>= 4.2)
+        - opsipxeconfd (>= 4.2.0.23)
         - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
         - opsi-utils (>= 4.2.0.149)
@@ -116,7 +116,7 @@ package:
         - unzip
       depends:
         - opsiconfd (>= 4.2.0.228)
-        - opsipxeconfd (>= 4.2)
+        - opsipxeconfd (>= 4.2.0.23)
         - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
         - opsi-utils (>= 4.2.0.149)
