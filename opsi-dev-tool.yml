@@ -168,7 +168,8 @@ package:
             opsi-setup --auto-configure-dhcpd 2>/dev/null || true
           fi
           if [ -d /usr/share/keyrings ]; then
-            cp /usr/share/opsi-server/opsi-obs.gpg /usr/share/keyrings/
+            mkdir -p /usr/local/share/keyrings
+            cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/
             [ -e /usr/local/share/keyrings/opsi.gpg ] && rm /usr/local/share/keyrings/opsi.gpg
           fi
         - *postinst_script
