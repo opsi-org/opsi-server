@@ -8,7 +8,12 @@ project:
   maintainer: uib GmbH <info@uib.de>
 
 postinst_script: &postinst_script |
-  if [ "$(lsb_release -si)"  == "Univention" ]; then
+  if [ -d /usr/share/keyrings ]; then
+    mkdir -p /usr/local/share/keyrings
+    cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/
+    [ -e /usr/local/share/keyrings/opsi.gpg ] && rm /usr/local/share/keyrings/opsi.gpg
+  fi
+  if [ "$(lsb_release -si)" == "Univention" ]; then
       echo "UCS"
       if [ -d "/var/www/" ]; then
         mkdir -p /var/www/icon/50x50
@@ -166,11 +171,6 @@ package:
             for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
             for i in nmb nmbd smb smbd; do systemctl restart $i 2>/dev/null || true; done
             opsi-setup --auto-configure-dhcpd 2>/dev/null || true
-          fi
-          if [ -d /usr/share/keyrings ]; then
-            mkdir -p /usr/local/share/keyrings
-            cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/
-            [ -e /usr/local/share/keyrings/opsi.gpg ] && rm /usr/local/share/keyrings/opsi.gpg
           fi
         - *postinst_script
         - exit 0
