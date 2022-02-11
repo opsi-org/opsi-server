@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.62
+  version: 4.2.0.63
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -12,6 +12,9 @@ postinst_script: &postinst_script |
     mkdir -p /usr/local/share/keyrings
     cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/
     [ -e /usr/local/share/keyrings/opsi.gpg ] && rm /usr/local/share/keyrings/opsi.gpg
+    if [ -e /etc/apt/sources.list.d/opsi.list ]; then
+      sed -i -E s'#^deb (\[.*\] )?(.*download.opensuse.org.*)#deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] \2#' /etc/apt/sources.list.d/opsi.list
+    fi
   fi
   if [ "$(lsb_release -si)" == "Univention" ]; then
       echo "UCS"
