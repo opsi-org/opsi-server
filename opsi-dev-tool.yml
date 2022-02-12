@@ -7,7 +7,7 @@ project:
     - license: AGPL-3.0
   maintainer: uib GmbH <info@uib.de>
 
-postinst_script: &postinst_script |
+postinst_repokey_script: &postinst_repokey_script |
   if [ -d /usr/share/keyrings ]; then
     mkdir -p /usr/local/share/keyrings
     cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/
@@ -16,6 +16,8 @@ postinst_script: &postinst_script |
       sed -i -E s'#^deb (\[.*\] )?(.*download.opensuse.org.*)#deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] \2#' /etc/apt/sources.list.d/opsi.list
     fi
   fi
+
+postinst_script: &postinst_script |
   if [ "$(lsb_release -si)" == "Univention" ]; then
       echo "UCS"
       if [ -d "/var/www/" ]; then
@@ -100,6 +102,7 @@ package:
     cp -a "${SRC}/opsi-server_data/opsi-obs.gpg" "${DST}/rootfs/usr/share/opsi-server/"
   postinst_script:
     - *postinst_script
+    - *postinst_repokey_script
     - exit 0
   subpackages:
     - name: expert
@@ -176,4 +179,5 @@ package:
             opsi-setup --auto-configure-dhcpd 2>/dev/null || true
           fi
         - *postinst_script
+        - *postinst_repokey_script
         - exit 0
