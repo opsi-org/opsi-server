@@ -123,6 +123,9 @@ package:
       replaces:
         - opsi-depotserver-expert
         - opsi4ucs
+      postinst_script:
+        - *postinst_script
+        - exit 0
     - name: full
       build_depends:
         - unzip
