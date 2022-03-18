@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=52
+VERSION=53
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -576,6 +576,10 @@ ucr set ucs/web/overview/entries/admin/opsi-server/label/de='opsi Server'
 ucr set ucs/web/overview/entries/admin/opsi-server/label='opsi server'
 ucr set ucs/web/overview/entries/admin/opsi-server/link="https://${FQDN}:4447/"
 ucr set ucs/web/overview/entries/admin/opsi-server/priority=50
+
+univention-directory-manager portals/entry modify "$@" --ignore_not_exists \
+	--dn "cn=opsi-server,cn=entry,cn=portals,cn=univention,${ROOT_DN}" \
+	--set linkTarget="newwindow" || die
 
 $VERBOSE && echo "Restarting services"
 if [ $DHCPSERVER = "1" ]; then
