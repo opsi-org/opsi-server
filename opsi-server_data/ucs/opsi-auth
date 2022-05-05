@@ -1,5 +1,21 @@
 @%@UCRWARNING=# @%@
 
 @include common-account
-@include common-auth
+
+# common-auth but pam_krb5 with no_ccache option http://manpages.ubuntu.com/manpages/trusty/man5/pam_krb5.5.html
+# with cache: pam_krb5(opsi-auth:setcred): (user <USER>) chown of ticket cache failed: Operation not permitted 
+auth    requisite  pam_nologin.so
+
+# local unix authentication
+auth    sufficient  pam_unix.so
+
+# remote authentication; if a service
+# - is not aware of the user, proceed with the next service
+
+auth   [success=done new_authtok_reqd=ok  user_unknown=ignore service_err=die authinfo_unavail=die    default=ignore] pam_krb5.so no_ccache use_first_pass minimum_uid=1000
+
+auth   [success=done new_authtok_reqd=ok  user_unknown=die  service_err=die authinfo_unavail=die  default=die]  pam_ldap.so use_first_pass
+
+auth   required  pam_env.so
+
 @include common-session
