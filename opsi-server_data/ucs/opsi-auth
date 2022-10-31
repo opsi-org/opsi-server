@@ -4,6 +4,8 @@
 
 # common-auth but pam_krb5 with no_ccache option http://manpages.ubuntu.com/manpages/trusty/man5/pam_krb5.5.html
 # with cache: pam_krb5(opsi-auth:setcred): (user <USER>) chown of ticket cache failed: Operation not permitted 
+# If there are problems with logging in via Kerberos, "debug" can be added as an option. The output can then be seen in the syslog.
+# There may also be indications of a problem in /var/log/auth.log. 
 auth    requisite  pam_nologin.so
 
 # local unix authentication
