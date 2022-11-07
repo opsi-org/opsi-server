@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=55
+VERSION=56
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -438,10 +438,10 @@ if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master"
 		opsi_password=$(cat $opsi_password)
 	fi
 
-	opsi-setup --register-depot -l5 --unattended "{\"address\": \"$config_server\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\"}"
+	if [ "$(awk -F [:\"] '$2 == "address" {print $5}' /etc/opsi/backends/jsonrpc.conf)" = "" ]; then
 
+		opsi-setup --register-depot -l5 --unattended "{\"address\": \"$config_server\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\"}"
 
-	if [ -e "/tmp/opsi.configure.package.updater" ]; then
 		# We shall configure opsi-package-updater to retrieve packages from
 		# the configserver.
 
@@ -458,8 +458,6 @@ if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master"
 			sed --in-place "/\[repository_opsi_server\]/{n;n;s/opsiDepotId =/opsiDepotId = $config_server/}" /etc/opsi/package-updater.repos.d/opsi-server.repo
 			$VERBOSE && echo ".OK"
 		fi
-
-		rm -f "/tmp/opsi.configure.package.updater"
 	fi
 else
 	if [ "$OPSI_ROLE" = "depotserver" ]; then
@@ -540,17 +538,12 @@ fi
 echo "Setting rights - this may take a while..."
 opsi-setup --set-rights
 
-if [ -e "/tmp/opsi.packages.install" ]; then
-	echo "Installing opsi products - this may take a while..."
-	opsi-package-updater -v install || echo "Installing opsi products failed. Please fix the problem and then run \"opsi-package-updater -v install\" manually."
-	rm -f /tmp/opsi.packages.install
-else
-	if [ -e "/tmp/opsi.packages.update" ]; then
-		echo "Updating opsi products - this may take a while..."
-		opsi-package-updater -v update || echo "Updating opsi products failed. Please fix the problem and then run \"opsi-package-updater -v update\" manually."
-		rm -f /tmp/opsi.packages.update
-	fi
-fi
+echo "Installing opsi products - this may take a while..."
+opsi-package-updater -v install || echo "Installing opsi products failed. Please fix the problem and then run \"opsi-package-updater -v install\" manually."
+
+echo "Updating opsi products - this may take a while..."
+opsi-package-updater -v update || echo "Updating opsi products failed. Please fix the problem and then run \"opsi-package-updater -v update\" manually."
+
 
 # --- Register templates ------------------------------------------------------------------------------------------------------------
 cp /usr/share/opsi-server/ucs/opsi-auth /etc/univention/templates/files/etc/pam.d/opsi-auth
