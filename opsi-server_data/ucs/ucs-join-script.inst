@@ -486,13 +486,7 @@ else
 
 	if [ "$OPSI_ROLE" = "configserver" ]; then
 		set +e
-		if [ -e /tmp/update_backends.opsi4ucs ]; then
-			UPDATE_BACKENDS=true
-			rm /tmp/update_backends.opsi4ucs
-		else
-			UPDATE_BACKENDS=false
-		fi
-
+		
 		MYSQL_CONFIGURED=$(egrep -v "^#" /etc/opsi/backendManager/dispatch.conf | grep mysql)
 		if [ -n "$MYSQL_CONFIGURED" ]; then
 			$VERBOSE && echo "mysql configured in dispatch.conf."
@@ -522,14 +516,9 @@ else
 				fi
 			else
 				$VERBOSE && echo "MySQL connection possible."
-				$UPDATE_BACKENDS && opsi-setup --update-mysql
 			fi
 		fi
 
-		FILE_BACKEND_CONFIGURED=$(egrep -v "^#" /etc/opsi/backendManager/dispatch.conf | grep file)
-		if [ -n "$FILE_BACKEND_CONFIGURED" ]; then
-			$UPDATE_BACKENDS && opsi-setup --update-file
-		fi
 		set -e
 	fi
 	opsi-setup --init-current-config
