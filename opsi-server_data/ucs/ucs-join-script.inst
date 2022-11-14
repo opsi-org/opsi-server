@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=56
+VERSION=58
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -34,6 +34,10 @@ BROADCAST=""
 WINDOMAIN=$(ucr get windows/domain)
 UCS_VERSION=$(ucr get version/version)
 UCS_PATCHLEVEL=$(ucr get version/patchlevel)
+OPSI_UCS_APP=$(ucr get appcenter/apps/opsi/status)
+# only with UCS APP
+OPSI_PACKAGES_TO_INSTALL="opsi-client-agent opsi-script opsi-configed opsi-logviewer opsi-setup-detector opsipackagebuilder_wlm swaudit hwaudit hwinvent"
+
 
 if   [ "$SERVER_ROLE" = "domaincontroller_master" ]; then
 	$VERBOSE && echo -e "\nRunning on UCS Master"
@@ -130,6 +134,7 @@ $VERBOSE && echo "     Gateway          : $GATEWAY"
 $VERBOSE && echo "     Subnet           : $SUBNET"
 $VERBOSE && echo "     Broadcast        : $BROADCAST"
 $VERBOSE && echo "     Windomain        : $WINDOMAIN"
+$VERBOSE && echo "     OPSI UCS APP     : $OPSI_UCS_APP"
 
 ## --- Deleting existing opsi extended-attribute ------------------------------------------------------------------------
 udm settings/extended_attribute remove "$@" \
@@ -426,6 +431,10 @@ grep -v "dport 69"  /etc/security/packetfilter.d/50_local.sh | grep  -v "dport 4
 cat $TEMPFILE > /etc/security/packetfilter.d/50_local.sh
 /usr/sbin/service univention-firewall restart
 
+OPSI_SERVER_STATUS=$(dpkg-query -W -f='${Status}' opsi-server-full)
+$VERBOSE && echo "opsi-server dpkg status: ${OPSI_SERVER_STATUS}"
+OPSICONFD_STATUS=$(dpkg-query -W -f='${Status}' opsiconfd)
+$VERBOSE && echo "opsiconfd dpkg status ${OPSICONFD_STATUS}"
 
 if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master" -a "$SERVER_ROLE" != "domaincontroller_backup" ]; then
 	$VERBOSE && echo "Registering Server as OpsiDepotserver on $config_server"
@@ -527,8 +536,10 @@ fi
 echo "Setting rights - this may take a while..."
 opsi-setup --set-rights
 
-echo "Installing opsi products - this may take a while..."
-opsi-package-updater -v install || echo "Installing opsi products failed. Please fix the problem and then run \"opsi-package-updater -v install\" manually."
+if [ "$OPSI_UCS_APP" = "installed" ]; then
+	echo "Installing opsi products - this may take a while..."
+	opsi-package-updater -v install ${OPSI_PACKAGES_TO_INSTALL} || echo "Installing opsi products failed. Please fix the problem and then run \"opsi-package-updater -v install\" manually."
+fi
 
 echo "Updating opsi products - this may take a while..."
 opsi-package-updater -v update || echo "Updating opsi products failed. Please fix the problem and then run \"opsi-package-updater -v update\" manually."
