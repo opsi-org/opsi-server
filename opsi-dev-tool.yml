@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.2.0.72
+  version: 4.3.0.0
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -57,7 +57,7 @@ package:
   build_depends:
     - unzip
   depends:
-    - opsiconfd (>= 4.2.0.228)
+    - opsiconfd (>= 4.3.0.0)
     - opsipxeconfd (>= 4.2.0.23)
     - opsi-linux-bootimage (>= 20200824)
     - opsi-tftpd-hpa | opsi-tftp-hpa-server
@@ -107,14 +107,14 @@ package:
   subpackages:
     - name: expert
       depends:
-        - opsiconfd (>= 4.2.0.228)
+        - opsiconfd (>= 4.3.0.0)
         - opsipxeconfd (>= 4.2.0.23)
         - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
         - opsi-utils (>= 4.2.0.149)
       provides:
-        - opsi-server (= 4.2)
-        - opsi-depotserver (= 4.2)
+        - opsi-server (= 4.3)
+        - opsi-depotserver (= 4.3)
       conflicts:
         - opsi-server
         - opsi-server-full
@@ -130,7 +130,7 @@ package:
       build_depends:
         - unzip
       depends:
-        - opsiconfd (>= 4.2.0.228)
+        - opsiconfd (>= 4.3.0.0)
         - opsipxeconfd (>= 4.2.0.23)
         - opsi-linux-bootimage (>= 20200824)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
@@ -146,8 +146,8 @@ package:
         - opsi-linux-support
         - grafana
       provides:
-        - opsi-server (= 4.2)
-        - opsi-depotserver (= 4.2)
+        - opsi-server (= 4.3)
+        - opsi-depotserver (= 4.3)
       conflicts:
         - opsi-server
         - opsi-server-expert
