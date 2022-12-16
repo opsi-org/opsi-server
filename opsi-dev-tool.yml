@@ -40,7 +40,6 @@ postinst_script: &postinst_script |
       fi
     fi
     # Setup
-    /usr/bin/opsiconfd setup --log-level-stderr=5 --log-level-file=0 || true
     opsi-setup --set-rights /etc || true
     [ -e /etc/dhcpd.conf ] && sed -i s'#"dhcpdConfigFile".*#"dhcpdConfigFile":         "/etc/dhcpd.conf",#' /etc/opsi/backends/dhcpd.conf
     [ -e /etc/dhcpd.conf ] && sed -i s'#linux/pxelinux.0#opsi/pxelinux.0#' /etc/opsi/backends/dhcpd.conf
