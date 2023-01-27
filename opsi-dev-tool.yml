@@ -18,7 +18,7 @@ postinst_repokey_script: &postinst_repokey_script |
   fi
 
 postinst_script: &postinst_script |
-  if [ "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
+  if [ -e /etc/lsb-release -a "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
       echo "UCS"
       if [ -d "/var/www/" ]; then
         mkdir -p /var/www/icon/50x50
@@ -166,7 +166,7 @@ package:
             systemctl restart grafana-server || true
           fi
           systemctl start grafana-server || true
-          if [ "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
+          if [ -e /etc/lsb-release -a "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
             update-inetd --remove tftp 2>/dev/null || true
             grep opsi_depot /etc/samba/smb.conf >/dev/null 2>&1 || opsi-setup --auto-configure-samba || true
             for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
