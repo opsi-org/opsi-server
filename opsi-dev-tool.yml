@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.3.0.0
+  version: 4.3.0.1
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -42,6 +42,20 @@ postinst_script: &postinst_script |
   opsi-setup --set-rights /var/lib/opsi/server_commands_custom.conf || true
   # Removing files dating before opsi 4.1
   [ -e /etc/opsi/version ] && rm /etc/opsi/version
+  # Removing extension files from opsi < 4.3
+  for ext in 10_opsi.conf 10_wim.conf 20_easy.conf 20_legacy.conf 30_kiosk.conf 30_sshcommands.conf 40_admin_tasks.conf 40_groupActions.conf 45_deprecated.conf 70_dynamic_depot.conf 70_wan.conf; do
+    extf="/etc/opsi/backendManager/extend.d/${ext}"
+    if [ -e "${extf}" ]; then
+      echo "Moving extension file ${extf} to /etc/opsi/backendManager/extend.d.old"
+      if [ ! -e /etc/opsi/backendManager/extend.d.old ]; then
+        mkdir -p /etc/opsi/backendManager/extend.d.old
+        chown :opsiadmin /etc/opsi/backendManager/extend.d.old || true
+        chmod 770 /etc/opsi/backendManager/extend.d.old
+      fi
+      mv "${extf}" /etc/opsi/backendManager/extend.d.old
+    fi
+  done
+
 package:
   name: opsi-server
   type: binary
