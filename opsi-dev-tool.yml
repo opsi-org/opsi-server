@@ -18,6 +18,7 @@ postinst_repokey_script: &postinst_repokey_script |
   fi
 
 postinst_script: &postinst_script |
+  mkdir -p /etc/opsi/backendManager/extend.d
   if [ -e /etc/lsb-release -a "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
       echo "UCS"
       if [ -d "/var/www/" ]; then
