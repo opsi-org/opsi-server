@@ -70,16 +70,6 @@ package:
     - opsi-depotserver (<< 4.2)
     - opsi4ucs (<< 4.2)
   source_script: |
-    mkdir -p "${DST}/rootfs/var/lib/opsi/depot"
-    mkdir -p "${DST}/rootfs/var/lib/opsi/ntfs-images"
-    mkdir -p "${DST}/rootfs/var/lib/opsi/repository"
-    mkdir -p "${DST}/rootfs/var/lib/opsi/workbench"
-    mkdir -p "${DST}/rootfs/var/lib/opsi/public"
-    mkdir -p "${DST}/rootfs/var/log/opsi/bootimage"
-    mkdir -p "${DST}/rootfs/var/log/opsi/clientconnect"
-    mkdir -p "${DST}/rootfs/var/log/opsi/instlog"
-    mkdir -p "${DST}/rootfs/var/log/opsi/userlogin"
-    mkdir -p "${DST}/rootfs/etc"
     mkdir -p "${DST}/rootfs/usr/share/opsi-server"
     cp -a "${SRC}/opsi-server_data/ucs" "${DST}/rootfs/usr/share/opsi-server/"
     cp -a "${SRC}/opsi-server_data/grafana" "${DST}/rootfs/usr/share/opsi-server/"
