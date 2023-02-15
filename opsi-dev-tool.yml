@@ -55,7 +55,6 @@ package:
     - redis-server (>= 6.0)
     - redis-timeseries
     - opsi-windows-support
-    - opsi-linux-support
   provides:
     - opsi-depotserver (= 4.2)
     - opsi4ucs (= 4.2)
@@ -117,7 +116,6 @@ package:
         - redis-server (>= 6.0)
         - redis-timeseries
         - opsi-windows-support
-        - opsi-linux-support
         - grafana
       provides:
         - opsi-server (= 4.3)
