@@ -34,7 +34,7 @@ postinst_script: &postinst_script |
     [ -e /var/lib/tftpboot/opsi ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf
   fi
   /usr/bin/opsiconfd setup --non-interactive --log-level-stderr=5 --log-level-file=0 || true
-  if [ ! systemctl is-active --quiet opsiconfd.service ]; then
+  if ! systemctl is-active --quiet opsiconfd.service; then
     systemctl start opsiconfd.service || true
   fi
 
@@ -159,7 +159,7 @@ package:
         - *postinst_script
         - *postinst_repokey_script
         - |
-          if [ ! systemctl is-active --quiet opsipxeconfd.service ]; then
+          if ! systemctl is-active --quiet opsipxeconfd.service; then
             systemctl start opsipxeconfd.service || true
           fi
         - exit 0
