@@ -162,4 +162,7 @@ package:
           if ! systemctl is-active --quiet opsipxeconfd.service; then
             systemctl start opsipxeconfd.service || true
           fi
+          if [ ! -e /etc/opsi/passwd ]; then
+            opsi-admin -d task setPcpatchPassword $(tr -dc A-Za-z0-9 </dev/urandom | head -c 16) || true
+          fi
         - exit 0
