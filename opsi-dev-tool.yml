@@ -151,18 +151,13 @@ package:
           systemctl start grafana-server || true
           if [ ! -e /etc/lsb-release -o "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" != "Univention" ]; then
             update-inetd --remove tftp 2>/dev/null || true
-            grep opsi_depot /etc/samba/smb.conf >/dev/null 2>&1 || opsi-setup --auto-configure-samba || true
             for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
-            for i in nmb nmbd smb smbd; do systemctl restart $i 2>/dev/null || true; done
-            opsi-setup --auto-configure-dhcpd 2>/dev/null || true
+            for i in nmb nmbd smb smbd; do systemctl start $i 2>/dev/null || true; done
           fi
         - *postinst_script
         - *postinst_repokey_script
         - |
           if ! systemctl is-active --quiet opsipxeconfd.service; then
             systemctl start opsipxeconfd.service || true
-          fi
-          if [ ! -e /etc/opsi/passwd ]; then
-            opsi-admin -d task setPcpatchPassword $(tr -dc A-Za-z0-9 </dev/urandom | head -c 16) || true
           fi
         - exit 0
