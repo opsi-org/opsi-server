@@ -1,27 +1,18 @@
-image: python:3.7-stretch
+image: docker.uib.gmbh/opsi/dev/pybuilder:uib-python-3.11
 
 stages:
   - publish
 
-.install_tools: &install_tools |
-  export DEBIAN_FRONTEND=noninteractive
-  apt update
-  apt -y install debhelper osc tar wget
-  wget "$OPSIDEVTOOLS_URL_LINUX_X64" -O opsi-dev-tools.tar.gz
-  tar -xvf opsi-dev-tools.tar.gz
-
 package:obs_int:
   stage: publish
   script:
-    - *install_tools
-    - ./opsi-dev-tool -l info --obs-update-package https://obs.uib.gmbh home:uibmz:opsi:4.2:development
+    - opsi-dev-tool -l info --obs-update-package https://obs.uib.gmbh home:uibmz:opsi:4.2:development
   only:
     - tags
 
 package:obs_ext:
   stage: publish
   script:
-    - *install_tools
-    - ./opsi-dev-tool -l info --obs-update-package https://build.opensuse.org home:uibmz:opsi:4.2:development
+    - opsi-dev-tool -l info --obs-update-package https://build.opensuse.org home:uibmz:opsi:4.2:development
   only:
     - tags
