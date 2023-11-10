@@ -1,4 +1,4 @@
-image: debian:bullseye
+image: docker.uib.gmbh/opsi/dev/pybuilder:uib-python-3.11
 
 stages:
   - publish
