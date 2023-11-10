@@ -150,7 +150,7 @@ package:
             systemctl restart grafana-server || true
           fi
           systemctl start grafana-server || true
-          if [ ! -e /etc/lsb-release -o "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" != "Univention" ]; then
+          if [ "$(grep DISTRIB_ID /etc/lsb-release 2>/dev/null | cut -d = -f2)" != "Univention" ]; then
             update-inetd --remove tftp 2>/dev/null || true
             for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
             for i in nmb nmbd smb smbd; do systemctl start $i 2>/dev/null || true; done
