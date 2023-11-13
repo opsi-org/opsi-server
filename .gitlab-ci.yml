@@ -9,6 +9,7 @@ stages:
   apt -y install debhelper osc tar wget
   wget "$OPSIDEVTOOLS_URL_LINUX_X64" -O opsi-dev-tools.tar.gz
   tar -xvf opsi-dev-tools.tar.gz
+  cp opsi-dev-tool opsi-dev-cli
 
 #package:obs_int:
 #  stage: publish
