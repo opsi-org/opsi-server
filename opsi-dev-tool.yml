@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: 4.3.1.0
+  version: 4.3.1.1
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -45,18 +45,18 @@ package:
   build_depends:
     - unzip
   depends:
-    - opsiconfd (>= 4.3.0.0)
-    - opsipxeconfd (>= 4.3.0.0)
-    - opsi-linux-bootimage (>= 20200824)
+    - opsiconfd (>= 4.3.1.0)
+    - opsipxeconfd (>= 4.3.1.0)
+    - opsi-linux-bootimage (>= 20231116)
     - opsi-tftpd-hpa | opsi-tftp-hpa-server
-    - opsi-utils (>= 4.3.0.0)
+    - opsi-utils (>= 4.3.1.0)
     - samba
     - sudo
     - wget
   suggests:
     - mysql-server
     - redis-server (>= 6.0)
-    - redis-timeseries
+    - redis-timeseries (>= 1.6)
   provides:
     - opsi-depotserver (= 4.2)
     - opsi4ucs (= 4.2)
@@ -82,11 +82,11 @@ package:
   subpackages:
     - name: expert
       depends:
-        - opsiconfd (>= 4.3.0.0)
-        - opsipxeconfd (>= 4.3.0.0)
-        - opsi-linux-bootimage (>= 20200824)
+        - opsiconfd (>= 4.3.1.0)
+        - opsipxeconfd (>= 4.3.1.0)
+        - opsi-linux-bootimage (>= 20231116)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
-        - opsi-utils (>= 4.3.0.0)
+        - opsi-utils (>= 4.3.1.0)
       provides:
         - opsi-server (= 4.3)
         - opsi-depotserver (= 4.3)
@@ -105,11 +105,11 @@ package:
       build_depends:
         - unzip
       depends:
-        - opsiconfd (>= 4.3.0.0)
-        - opsipxeconfd (>= 4.3.0.0)
-        - opsi-linux-bootimage (>= 20200824)
+        - opsiconfd (>= 4.3.1.0)
+        - opsipxeconfd (>= 4.3.1.0)
+        - opsi-linux-bootimage (>= 20231116)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server
-        - opsi-utils (>= 4.3.0.0)
+        - opsi-utils (>= 4.3.1.0)
         - univention-samba | samba
         - sudo
         - wget
