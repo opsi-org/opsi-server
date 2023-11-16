@@ -1,181 +1,164 @@
-package:
-  architecture: all
-  breaks:
-  - opsi-depotserver (<< 4.2)
-  - opsi4ucs (<< 4.2)
-  build_depends:
-  - unzip
-  conflicts:
-  - opsi-server-expert
-  - opsi-server-full
-  - python-opsi (<< 4.2)
-  depends:
-  - opsiconfd (>= 4.3.1.0)
-  - opsipxeconfd (>= 4.3.1.0)
-  - opsi-linux-bootimage (>= 20231116)
-  - opsi-tftpd-hpa | opsi-tftp-hpa-server
-  - opsi-utils (>= 4.3.1.0)
-  - samba
-  - sudo
-  - wget
-  name: opsi-server
-  postinst_script:
-  - "if [ -e /etc/lsb-release -a \"$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)\"\
-    \ == \"Univention\" ]; then\n  echo \"UCS\"\n  if [ -d \"/var/www/\" ]; then\n\
-    \    mkdir -p /var/www/icon/50x50\n    if [ -e \"/usr/share/opsi-server/ucs/opsi-logo.png\"\
-    \ ]; then\n      cp /usr/share/opsi-server/ucs/opsi-logo.png /var/www/icon/50x50/\n\
-    \      chmod 644 /var/www/icon/50x50/opsi-logo.png\n    fi\n  fi\n  cp /usr/share/opsi-server/ucs/ucs-join-script.inst\
-    \ /usr/lib/univention-install/99opsi4ucs.inst\n  . /usr/share/univention-lib/base.sh\n\
-    \  call_joinscript 99opsi4ucs.inst || true\nelse\n  [ -e /var/lib/tftpboot/opsi\
-    \ ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf\n\
-    fi\n/usr/bin/opsiconfd setup --non-interactive --log-level-stderr=5 --log-level-file=0\
-    \ || true\nif ! systemctl is-active --quiet opsiconfd.service; then\n  systemctl\
-    \ start opsiconfd.service || true\nfi\n"
-  - "if [ -d /usr/share/keyrings ]; then\n  mkdir -p /usr/local/share/keyrings\n \
-    \ cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/\n  [ -e /usr/local/share/keyrings/opsi.gpg\
-    \ ] && rm /usr/local/share/keyrings/opsi.gpg\n  if [ -e /etc/apt/sources.list.d/opsi.list\
-    \ ]; then\n    sed -i -E s'#^deb (\\[.*\\] )?(.*download.opensuse.org.*)#deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg]\
-    \ \\2#' /etc/apt/sources.list.d/opsi.list\n  fi\nfi\n"
-  - exit 0
-  provides:
-  - opsi-depotserver (= 4.2)
-  - opsi4ucs (= 4.2)
-  replaces:
-  - opsi-depotserver (<< 4.2)
-  - opsi4ucs (<< 4.2)
-  source_script: 'mkdir -p "${DST}/rootfs/usr/share/opsi-server"
-
-    cp -a "${SRC}/opsi-server_data/ucs" "${DST}/rootfs/usr/share/opsi-server/"
-
-    cp -a "${SRC}/opsi-server_data/grafana" "${DST}/rootfs/usr/share/opsi-server/"
-
-    cp -a "${SRC}/opsi-server_data/opsi-obs.gpg" "${DST}/rootfs/usr/share/opsi-server/"
-
-    '
-  subpackages:
-  - conflicts:
-    - opsi-server
-    - opsi-server-full
-    - python-opsi (<< 4.2)
-    - opsi4ucs
-    depends:
-    - opsiconfd (>= 4.3.1.0)
-    - opsipxeconfd (>= 4.3.1.0)
-    - opsi-linux-bootimage (>= 20231116)
-    - opsi-tftpd-hpa | opsi-tftp-hpa-server
-    - opsi-utils (>= 4.3.1.0)
-    name: expert
-    postinst_script:
-    - "if [ -e /etc/lsb-release -a \"$(grep DISTRIB_ID /etc/lsb-release | cut -d =\
-      \ -f2)\" == \"Univention\" ]; then\n  echo \"UCS\"\n  if [ -d \"/var/www/\"\
-      \ ]; then\n    mkdir -p /var/www/icon/50x50\n    if [ -e \"/usr/share/opsi-server/ucs/opsi-logo.png\"\
-      \ ]; then\n      cp /usr/share/opsi-server/ucs/opsi-logo.png /var/www/icon/50x50/\n\
-      \      chmod 644 /var/www/icon/50x50/opsi-logo.png\n    fi\n  fi\n  cp /usr/share/opsi-server/ucs/ucs-join-script.inst\
-      \ /usr/lib/univention-install/99opsi4ucs.inst\n  . /usr/share/univention-lib/base.sh\n\
-      \  call_joinscript 99opsi4ucs.inst || true\nelse\n  [ -e /var/lib/tftpboot/opsi\
-      \ ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf\n\
-      fi\n/usr/bin/opsiconfd setup --non-interactive --log-level-stderr=5 --log-level-file=0\
-      \ || true\nif ! systemctl is-active --quiet opsiconfd.service; then\n  systemctl\
-      \ start opsiconfd.service || true\nfi\n"
-    - exit 0
-    provides:
-    - opsi-server (= 4.3)
-    - opsi-depotserver (= 4.3)
-    replaces:
-    - opsi-depotserver-expert
-    - opsi4ucs
-  - build_depends:
-    - unzip
-    conflicts:
-    - opsi-server
-    - opsi-server-expert
-    - python-opsi (<< 4.2)
-    - opsi4ucs
-    depends:
-    - opsiconfd (>= 4.3.1.0)
-    - opsipxeconfd (>= 4.3.1.0)
-    - opsi-linux-bootimage (>= 20231116)
-    - opsi-tftpd-hpa | opsi-tftp-hpa-server
-    - opsi-utils (>= 4.3.1.0)
-    - univention-samba | samba
-    - sudo
-    - wget
-    - unzip
-    - univention-mariadb | univention-mysql | mariadb-server | mysql-server
-    - redis-server (>= 6.0)
-    - redis-timeseries
-    - grafana
-    - cabextract
-    - wimtools | wimlib
-    - smbclient | samba-client
-    name: full
-    postinst_script:
-    - "systemctl daemon-reload || true\nsystemctl enable mysql || true\nsystemctl\
-      \ start mysql || true\nsystemctl enable mariadb || true\nsystemctl start mariadb\
-      \ || true\nsystemctl enable redis-server || true\nsystemctl start redis-server\
-      \ || true\nsystemctl enable grafana-server || true\nif [ ! -e \"/var/lib/grafana/plugins/grafana-simple-json-datasource/MANIFEST.txt\"\
-      \ ]; then\n  mkdir -p /var/lib/grafana/plugins || true\n  [ -e \"/var/lib/grafana/plugins/grafana-simple-json-datasource\"\
-      \ ] && rm -r \"/var/lib/grafana/plugins/grafana-simple-json-datasource\"\n \
-      \ unzip -q /usr/share/opsi-server/grafana/grafana-simple-json-datasource.zip\
-      \ -d /var/lib/grafana/plugins/ || true\n  chown grafana:grafana -R /var/lib/grafana/plugins/grafana-simple-json-datasource\n\
-      \  chmod u=rwX,g=rX,o=rX -R /var/lib/grafana/plugins/grafana-simple-json-datasource\n\
-      \  systemctl restart grafana-server || true\nfi\nsystemctl start grafana-server\
-      \ || true\nif [ \"$(grep DISTRIB_ID /etc/lsb-release 2>/dev/null | cut -d =\
-      \ -f2)\" != \"Univention\" ]; then\n  update-inetd --remove tftp 2>/dev/null\
-      \ || true\n  for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null\
-      \ || true; done\n  for i in nmb nmbd smb smbd; do systemctl start $i 2>/dev/null\
-      \ || true; done\nfi\n"
-    - "if [ -e /etc/lsb-release -a \"$(grep DISTRIB_ID /etc/lsb-release | cut -d =\
-      \ -f2)\" == \"Univention\" ]; then\n  echo \"UCS\"\n  if [ -d \"/var/www/\"\
-      \ ]; then\n    mkdir -p /var/www/icon/50x50\n    if [ -e \"/usr/share/opsi-server/ucs/opsi-logo.png\"\
-      \ ]; then\n      cp /usr/share/opsi-server/ucs/opsi-logo.png /var/www/icon/50x50/\n\
-      \      chmod 644 /var/www/icon/50x50/opsi-logo.png\n    fi\n  fi\n  cp /usr/share/opsi-server/ucs/ucs-join-script.inst\
-      \ /usr/lib/univention-install/99opsi4ucs.inst\n  . /usr/share/univention-lib/base.sh\n\
-      \  call_joinscript 99opsi4ucs.inst || true\nelse\n  [ -e /var/lib/tftpboot/opsi\
-      \ ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf\n\
-      fi\n/usr/bin/opsiconfd setup --non-interactive --log-level-stderr=5 --log-level-file=0\
-      \ || true\nif ! systemctl is-active --quiet opsiconfd.service; then\n  systemctl\
-      \ start opsiconfd.service || true\nfi\n"
-    - "if [ -d /usr/share/keyrings ]; then\n  mkdir -p /usr/local/share/keyrings\n\
-      \  cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/\n  [ -e\
-      \ /usr/local/share/keyrings/opsi.gpg ] && rm /usr/local/share/keyrings/opsi.gpg\n\
-      \  if [ -e /etc/apt/sources.list.d/opsi.list ]; then\n    sed -i -E s'#^deb\
-      \ (\\[.*\\] )?(.*download.opensuse.org.*)#deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg]\
-      \ \\2#' /etc/apt/sources.list.d/opsi.list\n  fi\nfi\n"
-    - "if ! systemctl is-active --quiet opsipxeconfd.service; then\n  systemctl start\
-      \ opsipxeconfd.service || true\nfi\n"
-    - exit 0
-    provides:
-    - opsi-server (= 4.3)
-    - opsi-depotserver (= 4.3)
-    replaces:
-    - opsi4ucs
-  suggests:
-  - mysql-server
-  - redis-server (>= 6.0)
-  - redis-timeseries (>= 1.6)
-  type: binary
-postinst_repokey_script: "if [ -d /usr/share/keyrings ]; then\n  mkdir -p /usr/local/share/keyrings\n\
-  \  cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/\n  [ -e /usr/local/share/keyrings/opsi.gpg\
-  \ ] && rm /usr/local/share/keyrings/opsi.gpg\n  if [ -e /etc/apt/sources.list.d/opsi.list\
-  \ ]; then\n    sed -i -E s'#^deb (\\[.*\\] )?(.*download.opensuse.org.*)#deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg]\
-  \ \\2#' /etc/apt/sources.list.d/opsi.list\n  fi\nfi\n"
-postinst_script: "if [ -e /etc/lsb-release -a \"$(grep DISTRIB_ID /etc/lsb-release\
-  \ | cut -d = -f2)\" == \"Univention\" ]; then\n  echo \"UCS\"\n  if [ -d \"/var/www/\"\
-  \ ]; then\n    mkdir -p /var/www/icon/50x50\n    if [ -e \"/usr/share/opsi-server/ucs/opsi-logo.png\"\
-  \ ]; then\n      cp /usr/share/opsi-server/ucs/opsi-logo.png /var/www/icon/50x50/\n\
-  \      chmod 644 /var/www/icon/50x50/opsi-logo.png\n    fi\n  fi\n  cp /usr/share/opsi-server/ucs/ucs-join-script.inst\
-  \ /usr/lib/univention-install/99opsi4ucs.inst\n  . /usr/share/univention-lib/base.sh\n\
-  \  call_joinscript 99opsi4ucs.inst || true\nelse\n  [ -e /var/lib/tftpboot/opsi\
-  \ ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf\n\
-  fi\n/usr/bin/opsiconfd setup --non-interactive --log-level-stderr=5 --log-level-file=0\
-  \ || true\nif ! systemctl is-active --quiet opsiconfd.service; then\n  systemctl\
-  \ start opsiconfd.service || true\nfi\n"
 project:
+  name: opsi-server
+  version: 4.3.1.1
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
-  - license: AGPL-3.0
+    - license: AGPL-3.0
   maintainer: uib GmbH <info@uib.de>
+
+postinst_repokey_script: &postinst_repokey_script |
+  if [ -d /usr/share/keyrings ]; then
+    mkdir -p /usr/local/share/keyrings
+    cp /usr/share/opsi-server/opsi-obs.gpg /usr/local/share/keyrings/
+    [ -e /usr/local/share/keyrings/opsi.gpg ] && rm /usr/local/share/keyrings/opsi.gpg
+    if [ -e /etc/apt/sources.list.d/opsi.list ]; then
+      sed -i -E s'#^deb (\[.*\] )?(.*download.opensuse.org.*)#deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] \2#' /etc/apt/sources.list.d/opsi.list
+    fi
+  fi
+
+postinst_script: &postinst_script |
+  if [ -e /etc/lsb-release -a "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
+    echo "UCS"
+    if [ -d "/var/www/" ]; then
+      mkdir -p /var/www/icon/50x50
+      if [ -e "/usr/share/opsi-server/ucs/opsi-logo.png" ]; then
+        cp /usr/share/opsi-server/ucs/opsi-logo.png /var/www/icon/50x50/
+        chmod 644 /var/www/icon/50x50/opsi-logo.png
+      fi
+    fi
+    cp /usr/share/opsi-server/ucs/ucs-join-script.inst /usr/lib/univention-install/99opsi4ucs.inst
+    . /usr/share/univention-lib/base.sh
+    call_joinscript 99opsi4ucs.inst || true
+  else
+    [ -e /var/lib/tftpboot/opsi ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf
+  fi
+  /usr/bin/opsiconfd setup --non-interactive --log-level-stderr=5 --log-level-file=0 || true
+  if ! systemctl is-active --quiet opsiconfd.service; then
+    systemctl start opsiconfd.service || true
+  fi
+
+package:
   name: opsi-server
-  version: 4.3.1.1
+  type: binary
+  architecture: all
+  build_depends:
+    - unzip
+  depends:
+    - opsiconfd (>= 4.3.1.0)
+    - opsipxeconfd (>= 4.3.1.0)
+    - opsi-linux-bootimage (>= 20231116)
+    - opsi-tftpd-hpa | opsi-tftp-hpa-server
+    - opsi-utils (>= 4.3.1.0)
+    - samba
+    - sudo
+    - wget
+  suggests:
+    - mysql-server
+    - redis-server (>= 6.0)
+    - redis-timeseries (>= 1.6)
+  provides:
+    - opsi-depotserver (= 4.2)
+    - opsi4ucs (= 4.2)
+  breaks:
+    - opsi-depotserver (<< 4.2)
+    - opsi4ucs (<< 4.2)
+  conflicts:
+    - opsi-server-expert
+    - opsi-server-full
+    - python-opsi (<< 4.2)
+  replaces:
+    - opsi-depotserver (<< 4.2)
+    - opsi4ucs (<< 4.2)
+  source_script: |
+    mkdir -p "${DST}/rootfs/usr/share/opsi-server"
+    cp -a "${SRC}/opsi-server_data/ucs" "${DST}/rootfs/usr/share/opsi-server/"
+    cp -a "${SRC}/opsi-server_data/grafana" "${DST}/rootfs/usr/share/opsi-server/"
+    cp -a "${SRC}/opsi-server_data/opsi-obs.gpg" "${DST}/rootfs/usr/share/opsi-server/"
+  postinst_script:
+    - *postinst_script
+    - *postinst_repokey_script
+    - exit 0
+  subpackages:
+    - name: expert
+      depends:
+        - opsiconfd (>= 4.3.1.0)
+        - opsipxeconfd (>= 4.3.1.0)
+        - opsi-linux-bootimage (>= 20231116)
+        - opsi-tftpd-hpa | opsi-tftp-hpa-server
+        - opsi-utils (>= 4.3.1.0)
+      provides:
+        - opsi-server (= 4.3)
+        - opsi-depotserver (= 4.3)
+      conflicts:
+        - opsi-server
+        - opsi-server-full
+        - python-opsi (<< 4.2)
+        - opsi4ucs
+      replaces:
+        - opsi-depotserver-expert
+        - opsi4ucs
+      postinst_script:
+        - *postinst_script
+        - exit 0
+    - name: full
+      build_depends:
+        - unzip
+      depends:
+        - opsiconfd (>= 4.3.1.0)
+        - opsipxeconfd (>= 4.3.1.0)
+        - opsi-linux-bootimage (>= 20231116)
+        - opsi-tftpd-hpa | opsi-tftp-hpa-server
+        - opsi-utils (>= 4.3.1.0)
+        - univention-samba | samba
+        - sudo
+        - wget
+        - unzip
+        - univention-mariadb | univention-mysql | mariadb-server | mysql-server
+        - redis-server (>= 6.0)
+        - redis-timeseries
+        - grafana
+        - cabextract
+        - wimtools | wimlib
+        - smbclient | samba-client
+      provides:
+        - opsi-server (= 4.3)
+        - opsi-depotserver (= 4.3)
+      conflicts:
+        - opsi-server
+        - opsi-server-expert
+        - python-opsi (<< 4.2)
+        - opsi4ucs
+      replaces:
+        - opsi4ucs
+      postinst_script:
+        - |
+          systemctl daemon-reload || true
+          systemctl enable mysql || true
+          systemctl start mysql || true
+          systemctl enable mariadb || true
+          systemctl start mariadb || true
+          systemctl enable redis-server || true
+          systemctl start redis-server || true
+          systemctl enable grafana-server || true
+          if [ ! -e "/var/lib/grafana/plugins/grafana-simple-json-datasource/MANIFEST.txt" ]; then
+            mkdir -p /var/lib/grafana/plugins || true
+            [ -e "/var/lib/grafana/plugins/grafana-simple-json-datasource" ] && rm -r "/var/lib/grafana/plugins/grafana-simple-json-datasource"
+            unzip -q /usr/share/opsi-server/grafana/grafana-simple-json-datasource.zip -d /var/lib/grafana/plugins/ || true
+            chown grafana:grafana -R /var/lib/grafana/plugins/grafana-simple-json-datasource
+            chmod u=rwX,g=rX,o=rX -R /var/lib/grafana/plugins/grafana-simple-json-datasource
+            systemctl restart grafana-server || true
+          fi
+          systemctl start grafana-server || true
+          if [ "$(grep DISTRIB_ID /etc/lsb-release 2>/dev/null | cut -d = -f2)" != "Univention" ]; then
+            update-inetd --remove tftp 2>/dev/null || true
+            for i in nmb nmbd smb smbd; do systemctl enable $i 2>/dev/null || true; done
+            for i in nmb nmbd smb smbd; do systemctl start $i 2>/dev/null || true; done
+          fi
+        - *postinst_script
+        - *postinst_repokey_script
+        - |
+          if ! systemctl is-active --quiet opsipxeconfd.service; then
+            systemctl start opsipxeconfd.service || true
+          fi
+        - exit 0
