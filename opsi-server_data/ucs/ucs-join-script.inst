@@ -36,7 +36,7 @@ UCS_VERSION=$(ucr get version/version)
 UCS_PATCHLEVEL=$(ucr get version/patchlevel)
 OPSI_UCS_APP=$(ucr get appcenter/apps/opsi/status)
 # only with UCS APP
-OPSI_PACKAGES_TO_INSTALL="opsi-client-agent opsi-script opsi-configed opsi-logviewer opsi-setup-detector opsipackagebuilder_wlm swaudit hwaudit hwinvent"
+OPSI_PACKAGES_TO_INSTALL="opsi-client-agent opsi-script opsi-configed opsi-setup-detector opsipackagebuilder_wlm swaudit hwaudit hwinvent"
 
 
 if   [ "$SERVER_ROLE" = "domaincontroller_master" ]; then
