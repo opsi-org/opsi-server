@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=58
+VERSION=59
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -270,10 +270,15 @@ cat /tmp/.group.tmp.opsi4ucs | grep -v '^pcpatch:' | grep -v '^opsiadmin:' | gre
 rm /tmp/.group.tmp.opsi4ucs
 
 
+$VERBOSE && echo "Adding Administrator to opsiadmin"
 udm groups/group modify "$@" \
 	--dn "cn=opsiadmin,cn=groups,$ROOT_DN" \
 	--append users="uid=Administrator,cn=users,$ROOT_DN"
 
+$VERBOSE && echo "Adding Administrator to $fileadmingroup"
+udm groups/group modify "$@" \
+	--dn "cn=$fileadmingroup,cn=groups,$ROOT_DN" \
+	--append users="uid=Administrator,cn=users,$ROOT_DN"
 
 
 # --- Add samba shares ----------------------------------------------------------------------------------------------------------
