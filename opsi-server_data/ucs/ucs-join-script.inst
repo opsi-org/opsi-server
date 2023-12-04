@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=59
+VERSION=60
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -36,13 +36,13 @@ UCS_VERSION=$(ucr get version/version)
 UCS_PATCHLEVEL=$(ucr get version/patchlevel)
 OPSI_UCS_APP=$(ucr get appcenter/apps/opsi/status)
 # only with UCS APP
-OPSI_PACKAGES_TO_INSTALL="opsi-client-agent opsi-script opsi-configed opsi-setup-detector opsipackagebuilder_wlm swaudit hwaudit hwinvent"
+OPSI_PACKAGES_TO_INSTALL="opsi-client-agent opsi-script opsi-configed opsi-setup-detector swaudit hwaudit hwinvent"
 
 
-if   [ "$SERVER_ROLE" = "domaincontroller_master" ]; then
-	$VERBOSE && echo -e "\nRunning on UCS Master"
-elif [ "$SERVER_ROLE" = "domaincontroller_slave" ]; then
-	$VERBOSE && echo -e "\nRunning on UCS Slave"
+if   [ "$SERVER_ROLE" = "domaincontroller_prim" ]; then
+	$VERBOSE && echo -e "\nRunning on UCS Primary"
+elif [ "$SERVER_ROLE" = "domaincontroller_sec" ]; then
+	$VERBOSE && echo -e "\nRunning on UCS Secondary"
 elif [ "$SERVER_ROLE" = "domaincontroller_backup" ]; then
 	$VERBOSE && echo -e "\nRunning on UCS Backup"
 else
@@ -105,12 +105,12 @@ set +e
 config_server="$(univention-ldapsearch -x -L -s sub -b "$ROOT_DN" "(univentionService=OpsiConfigserver)" | grep -i '^cn:' | head -n1 | cut -d ':' -f2 | tr -d ' ' 2>/dev/null).$DOMAIN"
 $VERBOSE && echo "Found configserver: $config_server"
 set -e
-hostname_global_conf=$(grep hostname /etc/opsi/global.conf | cut -d "=" -f 2 | sed -e 's/^[[:space:]]*//')
-$VERBOSE && echo "Hostname in global.conf: $hostname_global_conf"
+id_opsi_conf=$(grep id /etc/opsi/opsi.conf | cut -d "=" -f 2 | sed -e 's/^[[:space:]]*//')
+$VERBOSE && echo "Hostname in global.conf: $id_opsi_conf"
 if [ "$config_server" == ".$DOMAIN" ]; then
 	$VERBOSE && echo "No Server marked as OpsiConfigserver, trying to set $FQDN as OpsiConfigserver for $ROOT_DN"
 	ucs_addServiceToLocalhost "OpsiConfigserver" "$@"
-elif [ "$config_server" != ".$DOMAIN" -a "$config_server" != "$FQDN" -a "$config_server" != "$hostname_global_conf" ]; then
+elif [ "$config_server" != ".$DOMAIN" -a "$config_server" != "$FQDN" -a "$config_server" != "$id_opsi_conf" ]; then
 	$VERBOSE && echo "Setting Opsi server role to 'depotserver'"
 	OPSI_ROLE="depotserver"
 fi
@@ -230,7 +230,7 @@ if [ $pcpatchUserMissing -ne 0 ]; then
 		$VERBOSE && echo -n "."
 		sleep 1
 		count=$((count+1))
-	done
+	donepcpatchpassword
 	$VERBOSE && echo "OK"
 	set -e
 fi
@@ -279,6 +279,16 @@ $VERBOSE && echo "Adding Administrator to $fileadmingroup"
 udm groups/group modify "$@" \
 	--dn "cn=$fileadmingroup,cn=groups,$ROOT_DN" \
 	--append users="uid=Administrator,cn=users,$ROOT_DN"
+
+
+$VERBOSE && echo -n "Waiting for opsi groups to be synced:"
+count=0
+while [ $count -le 600 ]; do
+	grep "opsiadmin" /var/lib/extrausers/group >/dev/null 2>/dev/null && break
+	$VERBOSE && echo -n "."
+	sleep 1
+	count=$((count+1))
+done
 
 
 # --- Add samba shares ----------------------------------------------------------------------------------------------------------
@@ -389,7 +399,7 @@ fi
 systemctl reload smbd.service || echo "Failed to reload smbd.service"
 
 $VERBOSE && echo "Waiting for samba shares"
-sleep 5
+sleep 10
 
 $VERBOSE && echo "Setting samba/acl/allow/execute/always=true"
 ucr set samba/acl/allow/execute/always=true
@@ -397,7 +407,7 @@ ucr set samba/acl/allow/execute/always=true
 ucr set samba4/ntacl/backend=native
 
 # --- Configure dhcp ------------------------------------------------------------------------------------------------------------
-if [ "$SERVER_ROLE" = "domaincontroller_master" ]; then
+if [ "$SERVER_ROLE" = "domaincontroller_prim" ]; then
 	set +e
 	univention-ldapsearch -x -L -s base -b "cn=$DOMAIN,cn=dhcp,$ROOT_DN" | grep use-host-decl-names >/dev/null
 	ret=$?
@@ -441,7 +451,7 @@ $VERBOSE && echo "opsi-server dpkg status: ${OPSI_SERVER_STATUS}"
 OPSICONFD_STATUS=$(dpkg-query -W -f='${Status}' opsiconfd)
 $VERBOSE && echo "opsiconfd dpkg status ${OPSICONFD_STATUS}"
 
-if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master" -a "$SERVER_ROLE" != "domaincontroller_backup" ]; then
+if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_prim" -a "$SERVER_ROLE" != "domaincontroller_backup" ]; then
 	$VERBOSE && echo "Registering Server as OpsiDepotserver on $config_server"
 	credentials="$@"
 	opsi_username=$(echo ${@:2:1} | awk -F "[=,]" '$1 == "uid" {print $2}')
@@ -454,7 +464,8 @@ if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_master"
 
 	if [ "$(awk -F [:\"] '$2 == "address" {print $5}' /etc/opsi/backends/jsonrpc.conf)" = "" ]; then
 
-		opsi-setup --register-depot -l5 --unattended "{\"address\": \"$config_server\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\"}"
+		# opsi-setup --register-depot -l5 --unattended "{\"address\": \"$config_server\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\"}"
+		opsiconfd setup --l5 -register-depot --unattended "{\"configserver\": \"${config_server}\", \"username\": \"${opsi_username}\", "\password\": \"${opsi_password}\", \"depot_id\": \"${FQDN}\", \"description\": \"Added with UCS join script.\"}"
 
 		# We shall configure opsi-package-updater to retrieve packages from
 		# the configserver.
@@ -535,15 +546,14 @@ else
 
 		set -e
 	fi
-	opsi-setup --init-current-config
 fi
 
-echo "Setting rights - this may take a while..."
-opsi-setup --set-rights
+echo "Running opsiconfd setup..."
+opsiconfd setup -l5
 
 if [ "$OPSI_UCS_APP" = "installed" ]; then
 	echo "Installing opsi products - this may take a while..."
-	opsi-package-updater -v install ${OPSI_PACKAGES_TO_INSTALL} || echo "Installing opsi products failed. Please fix the problem and then run \"opsi-package-updater -v install\" manually."
+	opsi-package-updater -v install ${OPSI_PACKAGES_TO_INSTALL} || echo "Installing opsi products failed. Please fix the problem and then run \"opsi-package-updater -v install ${OPSI_PACKAGES_TO_INSTALL}\" manually."
 fi
 
 echo "Updating opsi products - this may take a while..."
