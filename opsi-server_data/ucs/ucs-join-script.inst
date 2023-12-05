@@ -285,12 +285,12 @@ udm groups/group modify "$@" \
 $VERBOSE && echo -n "Waiting for opsi groups to be synced:"
 count=0
 while [ $count -le 600 ]; do
-	grep "opsiadmin" /var/lib/extrausers/group >/dev/null 2>/dev/null && break
+	grep "opsifileadmins" /var/lib/extrausers/group | grep "Administrator" >/dev/null 2>/dev/null && break
 	$VERBOSE && echo -n "."
 	sleep 1
 	count=$((count+1))
 done
-
+$VERBOSE && echo -n "Groups are synced."
 
 # --- Add samba shares ----------------------------------------------------------------------------------------------------------
 $VERBOSE && echo "Creating container for samba shares"
