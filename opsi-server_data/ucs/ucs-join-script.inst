@@ -553,7 +553,7 @@ else
 				export MYSQL_ROOT_PASSWORD=$(cat "/etc/mysql.secret")
 
 				$VERBOSE && echo "Attempting automatic configuration for MySQL backend..."
-				opsiconfd setup --configure-mysql
+				opsiconfd setup --configure-mysql --non-interactive
 				$VERBOSE && echo "Finished setting up MySQL backend."
 
 				# not keeping the password around.
