@@ -550,11 +550,10 @@ else
 		if [ $MYSQL_ALREADY_CONFIGURED -ne 0 ]; then
 			$VERBOSE && echo "Unable to connect to MySQL."
 			if [ -e "/etc/mysql.secret" ]; then
-				MYSQL_PW=$(cat "/etc/mysql.secret")
+				export MYSQL_ROOT_PASSWORD=$(cat "/etc/mysql.secret")
 
 				$VERBOSE && echo "Attempting automatic configuration for MySQL backend..."
-				UNATTENDED="{\"dbAdminPass\": \"$MYSQL_PW\", \"dbAdminUser\": \"root\", \"database\": \"opsi\"}"
-				opsi-setup --configure-mysql --unattended=$UNATTENDED || echo "unattended backend configuration failed!"
+				opsiconfd setup --configure-mysql
 				$VERBOSE && echo "Finished setting up MySQL backend."
 
 				# not keeping the password around.
