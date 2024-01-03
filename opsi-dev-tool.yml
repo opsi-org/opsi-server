@@ -48,7 +48,7 @@ package:
     - opsiconfd (>= 4.3.1.0)
     - opsipxeconfd (>= 4.3.1.0)
     - opsi-linux-bootimage (>= 20231116)
-    - opsi-tftpd-hpa | opsi-tftp-hpa-server
+    - opsi-tftpd-hpa | opsi-tftp-hpa-server | tftpd-hpa
     - opsi-utils (>= 4.3.1.0)
     - samba
     - sudo
@@ -85,7 +85,7 @@ package:
         - opsiconfd (>= 4.3.1.0)
         - opsipxeconfd (>= 4.3.1.0)
         - opsi-linux-bootimage (>= 20231116)
-        - opsi-tftpd-hpa | opsi-tftp-hpa-server
+        - opsi-tftpd-hpa | opsi-tftp-hpa-server | tftpd-hpa
         - opsi-utils (>= 4.3.1.0)
       provides:
         - opsi-server (= 4.3)
@@ -108,7 +108,7 @@ package:
         - opsiconfd (>= 4.3.1.0)
         - opsipxeconfd (>= 4.3.1.0)
         - opsi-linux-bootimage (>= 20231116)
-        - opsi-tftpd-hpa | opsi-tftp-hpa-server
+        - opsi-tftpd-hpa | opsi-tftp-hpa-server | tftpd-hpa
         - opsi-utils (>= 4.3.1.0)
         - opsi-webgui (>= 4.3.21)
         - univention-samba | samba
