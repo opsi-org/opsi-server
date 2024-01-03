@@ -250,7 +250,7 @@ if [ $ret != 0 ]; then
 		--position="cn=users,$ROOT_DN" \
 		--set username="opsiconfd" \
 		--set description="opsi configuration daemon user" \
-		--set unixhome="/var/lib/opsi" \
+		--set unixhome="/var/lib/opsiconfd/home" \
 		--set primaryGroup="cn=$fileadmingroup,cn=groups,$ROOT_DN" \
 		--set lastname="opsiconfd" \
 		--set password="${pass}" \
