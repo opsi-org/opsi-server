@@ -545,6 +545,9 @@ fi
 
 echo "Running opsiconfd setup..."
 opsiconfd setup -l6
+if [ "$SERVER_ROLE" == "domaincontroller_prim" ] || [ "$SERVER_ROLE" == "domaincontroller_backup" ]; then
+	opsiconfd setup -l6  --set-depot-user-password ${pcpatchpassword}
+fi
 opsi-setup --set-rights
 
 # not keeping the password around.
