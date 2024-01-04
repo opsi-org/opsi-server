@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=61
+VERSION=62
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -147,7 +147,7 @@ fileadmingroup="opsifileadmins"
 set +e
 grep "pcpatch" /etc/opsi/opsi.conf 2>/dev/null || true
 if [ $? = 0 ]; then
-	sed -i "s/pcpatch/opsifileadmins/g" /etc/opsi/opsi.conf
+	sed -i "s/pcpatch/opsifileadmins/" /etc/opsi/opsi.conf
 fi
 
 udm groups/group list "$@" --filter "(name=OPSI Depot Servers)" | grep '^DN:' 1>/dev/null
@@ -451,6 +451,8 @@ fi
 
 # --- Configure opsi ------------------------------------------------------------------------------------------------------------
 $VERBOSE && echo "Configuring opsi"
+$VERBOSE && echo "Skoip samba in opsiconfd setup"
+echo "$(awk '/^[^#]|^[skip-setup = [samba]|[,samba]|[samba,]/ {print;next} /skip-setup/{gsub(/\[/, "[samba,")};{print}' /etc/opsi/opsiconfd.conf)" > /etc/opsi/opsiconfd.conf
 $VERBOSE && echo "Checking security options for opsi"
 
 ucr set security/packetfilter/package/opsi4ucs/tcp/4447/all=ACCEPT
@@ -545,8 +547,9 @@ fi
 
 echo "Running opsiconfd setup..."
 opsiconfd setup -l6
+$VERBOSE && echo "Setting password for pcpatch"
+opsiconfd setup -l6  --set-depot-user-password '${pcpatchpassword}'
 if [ "$SERVER_ROLE" == "domaincontroller_prim" ] || [ "$SERVER_ROLE" == "domaincontroller_backup" ]; then
-	opsiconfd setup -l6  --set-depot-user-password ${pcpatchpassword}
 	udm users/user modify --dn "uid=pcpatch,cn=users,dc=uib,dc=local" --set ${pcpatchpassword}
 fi
 opsi-setup --set-rights
