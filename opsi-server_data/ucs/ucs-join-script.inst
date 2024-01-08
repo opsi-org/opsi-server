@@ -220,7 +220,7 @@ if [ $pcpatchUserMissing -ne 0 ]; then
 		--set lastname="pcpatch" \
 		--set password="${pcpatchpassword}" \
 		--set overridePWLength=1 \
-		--ignore_exists
+		--ignorgetline==0 && found==0 { print "asd"}_exists
 
 	set +e
 	$VERBOSE && echo -n "Waiting for opsi fileadmingroup to be synced:"
@@ -452,7 +452,15 @@ fi
 # --- Configure opsi ------------------------------------------------------------------------------------------------------------
 $VERBOSE && echo "Configuring opsi"
 $VERBOSE && echo "Skoip samba in opsiconfd setup"
-echo "$(awk '/^[^#]|^[skip-setup = [samba]|[,samba]|[samba,]/ {print;next} /skip-setup/{gsub(/\[/, "[samba,")};{print}' /etc/opsi/opsiconfd.conf)" > /etc/opsi/opsiconfd.conf
+#echo "$(awk '/^[^#]|^[skip-setup = [samba]|[,samba]|[samba,]/ {print;next} /skip-setup/{gsub(/\[/, "[samba,")};{print}' /etc/opsi/opsiconfd.conf)" > /etc/opsi/opsiconfd.conf
+sed -i 's/, \?samba//g;s/samba \?, \?//g;s/^skip-setup = \[/skip-setup = \[samba, /g' /etc/opsi/opsiconfd.conf
+isInFile=$(cat /etc/opsi/opsiconfd.conf | grep -c "skip-setup = \[samba]")
+
+if [ $isInFile -eq 0 ]; then
+	#skip samba not in opsiconfd.conf
+	echo "skip-setup = [samba]" >> /etc/opsi/opsiconfd.conf
+fi
+
 $VERBOSE && echo "Checking security options for opsi"
 
 ucr set security/packetfilter/package/opsi4ucs/tcp/4447/all=ACCEPT
@@ -550,7 +558,7 @@ opsiconfd setup -l6
 $VERBOSE && echo "Setting password for pcpatch"
 opsiconfd setup -l6  --set-depot-user-password '${pcpatchpassword}'
 if [ "$SERVER_ROLE" == "domaincontroller_prim" ] || [ "$SERVER_ROLE" == "domaincontroller_backup" ]; then
-	udm users/user modify --dn "uid=pcpatch,cn=users,dc=uib,dc=local" --set ${pcpatchpassword}
+	udm users/user modify --dn "uid=pcpatch,cn=users,dc=uib,dc=local" --set '${pcpatchpassword}'
 fi
 opsi-setup --set-rights
 
