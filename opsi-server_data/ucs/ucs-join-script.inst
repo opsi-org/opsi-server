@@ -145,9 +145,9 @@ $VERBOSE && echo "Adding system users and groups..."
 
 fileadmingroup="opsifileadmins"
 set +e
-grep "pcpatch" /etc/opsi/opsi.conf 2>/dev/null || true
+grep 'fileadmingroup = "pcpatch"' /etc/opsi/opsi.conf 2>/dev/null || true
 if [ $? = 0 ]; then
-	sed -i "s/pcpatch/opsifileadmins/" /etc/opsi/opsi.conf
+	sed -i 's/fileadmingroup = "pcpatch"/fileadmingroup = "opsifileadmins"/' /etc/opsi/opsi.conf
 fi
 
 udm groups/group list "$@" --filter "(name=OPSI Depot Servers)" | grep '^DN:' 1>/dev/null
@@ -220,7 +220,7 @@ if [ $pcpatchUserMissing -ne 0 ]; then
 		--set lastname="pcpatch" \
 		--set password="${pcpatchpassword}" \
 		--set overridePWLength=1 \
-		--ignorgetline==0 && found==0 { print "asd"}_exists
+		--ignore_exists
 
 	set +e
 	$VERBOSE && echo -n "Waiting for opsi fileadmingroup to be synced:"
@@ -451,12 +451,10 @@ fi
 
 # --- Configure opsi ------------------------------------------------------------------------------------------------------------
 $VERBOSE && echo "Configuring opsi"
-$VERBOSE && echo "Skoip samba in opsiconfd setup"
+$VERBOSE && echo "Skip samba in opsiconfd setup"
 #echo "$(awk '/^[^#]|^[skip-setup = [samba]|[,samba]|[samba,]/ {print;next} /skip-setup/{gsub(/\[/, "[samba,")};{print}' /etc/opsi/opsiconfd.conf)" > /etc/opsi/opsiconfd.conf
 sed -i 's/, \?samba//g;s/samba \?, \?//g;s/^skip-setup = \[/skip-setup = \[samba, /g' /etc/opsi/opsiconfd.conf
-isInFile=$(cat /etc/opsi/opsiconfd.conf | grep -c "skip-setup = \[samba]")
-
-if [ $isInFile -eq 0 ]; then
+if [ $(cat /etc/opsi/opsiconfd.conf | grep -c "skip-setup = \[samba]") -eq 0 ]; then
 	#skip samba not in opsiconfd.conf
 	echo "skip-setup = [samba]" >> /etc/opsi/opsiconfd.conf
 fi
@@ -557,9 +555,9 @@ echo "Running opsiconfd setup..."
 opsiconfd setup -l6
 $VERBOSE && echo "Setting password for pcpatch"
 opsiconfd setup -l6  --set-depot-user-password '${pcpatchpassword}'
-if [ "$SERVER_ROLE" == "domaincontroller_prim" ] || [ "$SERVER_ROLE" == "domaincontroller_backup" ]; then
-	udm users/user modify --dn "uid=pcpatch,cn=users,dc=uib,dc=local" --set '${pcpatchpassword}'
-fi
+# if [ "$SERVER_ROLE" == "domaincontroller_prim" ] || [ "$SERVER_ROLE" == "domaincontroller_backup" ]; then
+# 	udm users/user modify --dn "uid=pcpatch,cn=users,$ROOT_DN" --set password=${pcpatchpassword}
+# fi
 opsi-setup --set-rights
 
 # not keeping the password around.
