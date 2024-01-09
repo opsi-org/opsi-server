@@ -555,6 +555,7 @@ echo "Running opsiconfd setup..."
 opsiconfd setup -l6
 $VERBOSE && echo "Setting password for pcpatch"
 opsiconfd setup -l6  --set-depot-user-password '${pcpatchpassword}'
+opsi-cli jsonrpc execute config_updateObject '{"id": "clientconfig.depot.user",  "possibleValues": ["pcpatch"], "defaultValues": ["pcpatch"]}'  
 # if [ "$SERVER_ROLE" == "domaincontroller_prim" ] || [ "$SERVER_ROLE" == "domaincontroller_backup" ]; then
 # 	udm users/user modify --dn "uid=pcpatch,cn=users,$ROOT_DN" --set password=${pcpatchpassword}
 # fi
