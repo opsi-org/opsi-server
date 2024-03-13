@@ -142,12 +142,12 @@ package:
           systemctl enable redis-server || true
           systemctl start redis-server || true
           systemctl enable grafana-server || true
-          if [ ! -e "/var/lib/grafana/plugins/grafana-simple-json-datasource/MANIFEST.txt" ]; then
+          if [ ! -e "/var/lib/grafana/plugins/simpod-json-datasource/MANIFEST.txt" ]; then
             mkdir -p /var/lib/grafana/plugins || true
-            [ -e "/var/lib/grafana/plugins/grafana-simple-json-datasource" ] && rm -r "/var/lib/grafana/plugins/grafana-simple-json-datasource"
-            unzip -q /usr/share/opsi-server/grafana/grafana-simple-json-datasource.zip -d /var/lib/grafana/plugins/ || true
-            chown grafana:grafana -R /var/lib/grafana/plugins/grafana-simple-json-datasource
-            chmod u=rwX,g=rX,o=rX -R /var/lib/grafana/plugins/grafana-simple-json-datasource
+            [ -e "/var/lib/grafana/plugins/simpod-json-datasource" ] && rm -r "/var/lib/grafana/plugins/simpod-json-datasource"
+            unzip -q /usr/share/opsi-server/grafana/simpod-json-datasource-0.6.3.zip -d /var/lib/grafana/plugins/ || true
+            chown grafana:grafana -R /var/lib/grafana/plugins/simpod-json-datasource
+            chmod u=rwX,g=rX,o=rX -R /var/lib/grafana/plugins/simpod-json-datasource
             systemctl restart grafana-server || true
           fi
           systemctl start grafana-server || true
