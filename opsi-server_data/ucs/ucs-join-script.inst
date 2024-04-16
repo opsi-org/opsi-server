@@ -498,7 +498,7 @@ if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_prim" -
 	if [ "$(awk -F [:\"] '$2 == "address" {print $5}' /etc/opsi/backends/jsonrpc.conf)" = "" ]; then
 
 		# opsi-setup --register-depot -l5 --unattended "{\"address\": \"$config_server\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\"}"
-		opsiconfd setup --l5 -register-depot --unattended "{\"configserver\": \"${config_server}\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\", \"depot_id\": \"${FQDN}\", \"description\": \"Added with UCS join script.\"}"
+		opsiconfd setup -l5 --register-depot --unattended "{\"configserver\": \"${config_server}\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\", \"depot_id\": \"${FQDN}\", \"description\": \"Added with UCS join script.\"}"
 
 		# We shall configure opsi-package-updater to retrieve packages from
 		# the configserver.
