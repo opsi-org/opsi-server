@@ -4,7 +4,7 @@
 # http://www.uib.de
 # All rights reserved.
 
-VERSION=62
+VERSION=63
 VERBOSE=true
 
 . /usr/share/univention-join/joinscripthelper.lib
@@ -455,7 +455,7 @@ $VERBOSE && echo "Skip samba in opsiconfd setup"
 sed -i 's/, \?samba//g;s/samba \?, \?//g;s/^skip-setup = \[/skip-setup = \[samba, /g' /etc/opsi/opsiconfd.conf
 if [ $(cat /etc/opsi/opsiconfd.conf | grep -c "skip-setup = \[samba]") -eq 0 ]; then
 	#skip samba not in opsiconfd.conf
-	echo "skip-setup = [samba]" >> /etc/opsi/opsiconfd.conf
+	echo -e "\nskip-setup = [samba]" >> /etc/opsi/opsiconfd.conf
 fi
 
 $VERBOSE && echo "Checking security options for opsi"
