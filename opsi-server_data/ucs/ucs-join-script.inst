@@ -603,6 +603,13 @@ sleep 5
 /usr/sbin/service opsipxeconfd restart || true
 sleep 5
 
+count=0
+while [[ $(timeout 5 bash -c "</dev/tcp/localhost/4447" > /dev/null; echo $?) -eq 1 && $count -le 600 ]]; do
+	$VERBOSE && echo "Waiting for opsiconfd to start..."
+	count=$((count+1))
+	sleep 1
+done
+
 # --- Install and update packages -----------------------------------------------------------------------------------------------------
 if [ "$OPSI_UCS_APP" = "installed" ]; then
 	echo "Installing opsi products - this may take a while..."
