@@ -6,5 +6,5 @@
 # There may also be indications of a problem in /var/log/auth.log.
 
 auth  requisite  pam_nologin.so
-auth  [success=done new_authtok_reqd=ok user_unknown=die service_err=die authinfo_unavail=die default=die]  pam_krb5.so no_ccache use_first_pass minimum_uid=1000
+auth  [success=done new_authtok_reqd=ok user_unknown=die service_err=die authinfo_unavail=die default=die]  pam_krb5.so no_ccache minimum_uid=1000
 account  required  pam_krb5.so minimum_uid=1000
