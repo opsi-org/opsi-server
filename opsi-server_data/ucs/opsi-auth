@@ -1,23 +1,10 @@
 @%@UCRWARNING=# @%@
 
-@include common-account
-
-# common-auth but pam_krb5 with no_ccache option http://manpages.ubuntu.com/manpages/trusty/man5/pam_krb5.5.html
-# with cache: pam_krb5(opsi-auth:setcred): (user <USER>) chown of ticket cache failed: Operation not permitted 
+# Using pam_krb5 with no_ccache option http://manpages.ubuntu.com/manpages/trusty/man5/pam_krb5.5.html
+# To avoid error: pam_krb5(opsi-auth:setcred): (user <USER>) chown of ticket cache failed: Operation not permitted
 # If there are problems with logging in via Kerberos, "debug" can be added as an option. The output can then be seen in the syslog.
-# There may also be indications of a problem in /var/log/auth.log. 
-auth    requisite  pam_nologin.so
+# There may also be indications of a problem in /var/log/auth.log.
 
-# local unix authentication
-auth    sufficient  pam_unix.so
-
-# remote authentication; if a service
-# - is not aware of the user, proceed with the next service
-
-auth   [success=done new_authtok_reqd=ok  user_unknown=ignore service_err=die authinfo_unavail=die    default=ignore] pam_krb5.so no_ccache use_first_pass minimum_uid=1000
-
-auth   [success=done new_authtok_reqd=ok  user_unknown=die  service_err=die authinfo_unavail=die  default=die]  pam_ldap.so use_first_pass
-
-auth   required  pam_env.so
-
-@include common-session
+auth  requisite  pam_nologin.so
+auth  [success=done new_authtok_reqd=ok user_unknown=die service_err=die authinfo_unavail=die default=die]  pam_krb5.so no_ccache use_first_pass minimum_uid=1000
+account  required  pam_krb5.so minimum_uid=1000
