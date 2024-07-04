@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: "4.3.3.0"
+  version: "4.3.3.1"
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -35,7 +35,7 @@ postinst_script: &postinst_script |
       systemctl start opsiconfd.service || true
     fi
   fi
-  
+
 
 call_join_script: &call_join_script |
   if [ -e /etc/lsb-release -a "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
