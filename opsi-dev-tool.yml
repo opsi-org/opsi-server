@@ -28,14 +28,19 @@ postinst_script: &postinst_script |
       fi
     fi
     cp /usr/share/opsi-server/ucs/ucs-join-script.inst /usr/lib/univention-install/99opsi4ucs.inst
-    . /usr/share/univention-lib/base.sh
-    call_joinscript 99opsi4ucs.inst || true
   else
     [ -e /var/lib/tftpboot/opsi ] && sed -i s'#/tftpboot/linux#/var/lib/tftpboot/opsi#' /etc/opsi/opsipxeconfd.conf
+    /usr/bin/opsiconfd setup --non-interactive --log-level-stderr=5 --log-level-file=0 || true
+    if ! systemctl is-active --quiet opsiconfd.service; then
+      systemctl start opsiconfd.service || true
+    fi
   fi
-  /usr/bin/opsiconfd setup --non-interactive --log-level-stderr=5 --log-level-file=0 || true
-  if ! systemctl is-active --quiet opsiconfd.service; then
-    systemctl start opsiconfd.service || true
+  
+
+call_join_script: &call_join_script |
+  if [ -e /etc/lsb-release -a "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
+    . /usr/share/univention-lib/base.sh
+    call_joinscript 99opsi4ucs.inst || true
   fi
 
 package:
@@ -77,6 +82,7 @@ package:
     cp -a "${SRC}/opsi-server_data/opsi-obs.gpg" "${DST}/rootfs/usr/share/opsi-server/"
   postinst_script:
     - *postinst_script
+    - *call_join_script
     - *postinst_repokey_script
     - exit 0
   subpackages:
@@ -157,6 +163,7 @@ package:
             for i in nmb nmbd smb smbd; do systemctl start $i 2>/dev/null || true; done
           fi
         - *postinst_script
+        - *call_join_script
         - *postinst_repokey_script
         - |
           if ! systemctl is-active --quiet opsipxeconfd.service; then
