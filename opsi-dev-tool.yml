@@ -18,7 +18,7 @@ postinst_repokey_script: &postinst_repokey_script |
   fi
 
 postinst_script: &postinst_script |
-  if [ -e /etc/lsb-release -a "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
+  if [ "$(grep DISTRIB_ID /etc/lsb-release 2>/dev/null | cut -d = -f2)" == "Univention" ]; then
     echo "UCS"
     if [ -d "/var/www/" ]; then
       mkdir -p /var/www/icon/50x50
@@ -38,7 +38,7 @@ postinst_script: &postinst_script |
 
 
 call_join_script: &call_join_script |
-  if [ -e /etc/lsb-release -a "$(grep DISTRIB_ID /etc/lsb-release | cut -d = -f2)" == "Univention" ]; then
+  if [ "$(grep DISTRIB_ID /etc/lsb-release 2>/dev/null | cut -d = -f2)" == "Univention" ]; then
     . /usr/share/univention-lib/base.sh
     call_joinscript 99opsi4ucs.inst || true
   fi
