@@ -151,9 +151,9 @@ package:
           if [ ! -e "/var/lib/grafana/plugins/simpod-json-datasource/MANIFEST.txt" ]; then
             mkdir -p /var/lib/grafana/plugins || true
             [ -e "/var/lib/grafana/plugins/simpod-json-datasource" ] && rm -r "/var/lib/grafana/plugins/simpod-json-datasource"
-            unzip -q /usr/share/opsi-server/grafana/simpod-json-datasource-0.6.3.zip -d /var/lib/grafana/plugins/ || true
-            chown grafana:grafana -R /var/lib/grafana/plugins/simpod-json-datasource
-            chmod u=rwX,g=rX,o=rX -R /var/lib/grafana/plugins/simpod-json-datasource
+            unzip -q /usr/share/opsi-server/grafana/simpod-json-datasource-*.zip -d /var/lib/grafana/plugins/ || true
+            chown grafana:grafana -R /var/lib/grafana/plugins
+            chmod u=rwX,g=rX,o=rX -R /var/lib/grafana/plugins
             systemctl restart grafana-server || true
           fi
           systemctl start grafana-server || true
