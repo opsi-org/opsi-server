@@ -309,6 +309,7 @@ set -e
 if [ $ret != 0 ]; then
 	$VERBOSE && echo "Adding samba share opsi_depot_rw"
 	udm shares/share create "$@" \
+		--option samba \
 		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
 		--set name=opsi_depot_rw \
 		--set host=$FQDN \
@@ -327,6 +328,7 @@ set -e
 if [ $ret != 0 ]; then
 	$VERBOSE && echo "Adding samba share opsi_depot"
 	udm shares/share create "$@" \
+		--option samba \
 		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
 		--set name=opsi_depot \
 		--set host=$FQDN \
@@ -351,6 +353,7 @@ set -e
 if [ $ret != 0 ]; then
 	$VERBOSE && echo "Adding samba share opsi_repository"
 	udm shares/share create "$@" \
+		--option samba \
 		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
 		--set name=opsi_repository \
 		--set host=$FQDN \
@@ -376,6 +379,7 @@ set -e
 if [ $ret != 0 ]; then
 	$VERBOSE && echo "Adding samba share opsi_workbench"
 	udm shares/share create "$@" \
+		--option samba \
 		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
 		--set name=opsi_workbench \
 		--set host=$FQDN \
@@ -401,6 +405,7 @@ set -e
 if [ $ret != 0 ]; then
 	$VERBOSE && echo "Adding samba share opsi_images"
 	udm shares/share create "$@" \
+		--option samba \
 		--position="cn=$FQDN,cn=shares,$ROOT_DN" \
 		--set name=opsi_images \
 		--set host=$FQDN \
@@ -545,7 +550,7 @@ else
 	if [ "$OPSI_ROLE" = "configserver" ]; then
 		if [ -e "/etc/mysql.secret" ]; then
 			export MYSQL_ROOT_PASSWORD=$(cat "/etc/mysql.secret")
-			
+
 		fi
 	fi
 fi
@@ -556,7 +561,7 @@ if [ $pcpatchUserMissing -ne 0 ]; then
 	$VERBOSE && echo "Setting password for pcpatch"
 	opsiconfd setup -l6  --set-depot-user-password ${pcpatchpassword}
 fi
-# opsi-cli jsonrpc execute config_updateObject '{"id": "clientconfig.depot.user",  "possibleValues": ["pcpatch"], "defaultValues": ["pcpatch"]}'  
+# opsi-cli jsonrpc execute config_updateObject '{"id": "clientconfig.depot.user",  "possibleValues": ["pcpatch"], "defaultValues": ["pcpatch"]}'
 opsi-setup --set-rights
 
 # not keeping the password around.
