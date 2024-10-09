@@ -136,6 +136,11 @@ $VERBOSE && echo "     Broadcast        : $BROADCAST"
 $VERBOSE && echo "     Windomain        : $WINDOMAIN"
 $VERBOSE && echo "     OPSI UCS APP     : $OPSI_UCS_APP"
 
+# --- Setting opsi setup admin user and password -----------------------------------------------------------------------
+
+OPSICONFD_SETUP_ADMIN_USER=$(echo ${@:2:1} | awk -F "[=,]" '$1 == "uid" {print $2}')
+OPSICONFD_SETUP_ADMIN_PASSWORD=${@:4:1}
+
 ## --- Deleting existing opsi extended-attribute ------------------------------------------------------------------------
 udm settings/extended_attribute remove "$@" \
 	--dn="cn=opsiHostId,cn=custom attributes,cn=univention,$ROOT_DN" --ignore_not_exists
@@ -502,7 +507,6 @@ if [ "$OPSI_ROLE" = "depotserver" -a "$SERVER_ROLE" != "domaincontroller_prim" -
 
 	if [ "$(awk -F [:\"] '$2 == "address" {print $5}' /etc/opsi/backends/jsonrpc.conf)" = "" ]; then
 
-		# opsi-setup --register-depot -l5 --unattended "{\"address\": \"$config_server\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\"}"
 		opsiconfd setup -l5 --register-depot --unattended "{\"configserver\": \"${config_server}\", \"username\": \"${opsi_username}\", \"password\": \"${opsi_password}\", \"depot_id\": \"${FQDN}\", \"description\": \"Added with UCS join script.\"}"
 
 		# We shall configure opsi-package-updater to retrieve packages from
@@ -556,10 +560,10 @@ else
 fi
 
 echo "Running opsiconfd setup..."
-opsiconfd setup -l6
+opsiconfd setup -l6 --non-interactive
 if [ $pcpatchUserMissing -ne 0 ]; then
 	$VERBOSE && echo "Setting password for pcpatch"
-	opsiconfd setup -l6  --set-depot-user-password ${pcpatchpassword}
+	opsiconfd setup -l6  --set-depot-user-password ${pcpatchpassword} --non-interactive
 fi
 # opsi-cli jsonrpc execute config_updateObject '{"id": "clientconfig.depot.user",  "possibleValues": ["pcpatch"], "defaultValues": ["pcpatch"]}'
 opsi-setup --set-rights
@@ -623,6 +627,10 @@ fi
 
 echo "Updating opsi products - this may take a while..."
 opsi-package-updater -v update || echo "Updating opsi products failed. Please fix the problem and then run \"opsi-package-updater -v update\" manually."
+
+# --- Unset opsi setup admin user and password -----------------------------------------------------------------------
+unset OPSICONFD_SETUP_ADMIN_USER
+unset OPSICONFD_SETUP_ADMIN_PASSWORD
 
 joinscript_save_current_version
 
