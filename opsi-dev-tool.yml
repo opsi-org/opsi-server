@@ -91,8 +91,8 @@ package:
         - opsiconfd (>= 4.3.1.0)
         - opsi-utils (>= 4.3.1.0)
       provides:
-        - opsi-server (= 4.3)
-        - opsi-depotserver (= 4.3)
+        - opsi-server (= 4.4)
+        - opsi-depotserver (= 4.4)
       conflicts:
         - opsi-server
         - opsi-server-full
@@ -110,7 +110,7 @@ package:
       depends:
         - opsiconfd (>= 4.4.0.1)
         - opsipxeconfd (>= 4.3.1.0)
-        - opsi-bootimage (>= 4.4.0.1)
+        - opsi-bootimage (>= 4.4.0.0)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server | tftpd-hpa
         - opsi-utils (>= 4.3.1.0)
         - opsi-webgui (>= 4.3.21)
@@ -126,8 +126,8 @@ package:
         - wimtools | wimlib
         - smbclient | samba-client
       provides:
-        - opsi-server (= 4.3)
-        - opsi-depotserver (= 4.3)
+        - opsi-server (= 4.4)
+        - opsi-depotserver (= 4.4)
       conflicts:
         - opsi-server
         - opsi-server-expert
