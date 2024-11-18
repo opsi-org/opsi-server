@@ -1,6 +1,6 @@
 project:
   name: opsi-server
-  version: "4.3.5.1"
+  version: "4.4.0.1"
   description: opsi server
   homepage: http://www.opsi.org
   licenses:
@@ -50,9 +50,9 @@ package:
   build_depends:
     - unzip
   depends:
-    - opsiconfd (>= 4.3.1.0)
+    - opsiconfd (>= 4.4.0.1)
     - opsipxeconfd (>= 4.3.1.0)
-    - opsi-linux-bootimage (>= 20231116)
+    - opsi-bootimage (>= 4.4.0.1)
     - opsi-tftpd-hpa | opsi-tftp-hpa-server | tftpd-hpa
     - opsi-utils (>= 4.3.1.0)
     - samba
@@ -108,9 +108,9 @@ package:
       build_depends:
         - unzip
       depends:
-        - opsiconfd (>= 4.3.1.0)
+        - opsiconfd (>= 4.4.0.1)
         - opsipxeconfd (>= 4.3.1.0)
-        - opsi-linux-bootimage (>= 20231116)
+        - opsi-bootimage (>= 4.4.0.1)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server | tftpd-hpa
         - opsi-utils (>= 4.3.1.0)
         - opsi-webgui (>= 4.3.21)
