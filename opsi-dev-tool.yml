@@ -51,10 +51,10 @@ package:
     - unzip
   depends:
     - opsiconfd (>= 4.4.0.1)
-    - opsipxeconfd (>= 4.3.1.0)
+    - opsipxeconfd (>= 4.4.0.0)
     - opsi-bootimage (>= 4.4.0.1)
     - opsi-tftpd-hpa | opsi-tftp-hpa-server | tftpd-hpa
-    - opsi-utils (>= 4.3.1.0)
+    - opsi-utils (>= 4.4.0.0)
     - samba
     - sudo
     - wget
@@ -88,8 +88,8 @@ package:
   subpackages:
     - name: expert
       depends:
-        - opsiconfd (>= 4.3.1.0)
-        - opsi-utils (>= 4.3.1.0)
+        - opsiconfd (>= 4.4.0.0)
+        - opsi-utils (>= 4.4.0.0)
       provides:
         - opsi-server (= 4.4)
         - opsi-depotserver (= 4.4)
@@ -109,10 +109,10 @@ package:
         - unzip
       depends:
         - opsiconfd (>= 4.4.0.1)
-        - opsipxeconfd (>= 4.3.1.0)
+        - opsipxeconfd (>= 4.4.0.0)
         - opsi-bootimage (>= 4.4.0.0)
         - opsi-tftpd-hpa | opsi-tftp-hpa-server | tftpd-hpa
-        - opsi-utils (>= 4.3.1.0)
+        - opsi-utils (>= 4.4.0.0)
         - opsi-webgui (>= 4.3.21)
         - univention-samba | samba
         - sudo
