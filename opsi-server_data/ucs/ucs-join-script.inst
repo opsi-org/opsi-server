@@ -596,24 +596,25 @@ ucr set ucs/web/overview/entries/admin/opsi-server/label='opsi server'
 ucr set ucs/web/overview/entries/admin/opsi-server/link="https://${FQDN}:4447/"
 ucr set ucs/web/overview/entries/admin/opsi-server/priority=50
 
-if [ $UCS_VERSION = "5.0" ]; then
+if [ $UCS_VERSION = "5.0" || $UCS_VERSION = "5.2"]; then
 	univention-directory-manager portals/entry modify "$@" --ignore_not_exists \
 		--dn "cn=opsi-server,cn=entry,cn=portals,cn=univention,${ROOT_DN}" \
-		--set linkTarget="newwindow" || die
+		--set linkTarget="newwindow" || true
 fi
 
 $VERBOSE && echo "Restarting services"
 if [ $DHCPSERVER = "1" ]; then
 	/usr/sbin/service univention-dhcp restart || true
 fi
+sleep 2
 systemctl reload smbd.service || true
-/usr/sbin/service opsiconfd restart || true
+systemctl restart opsiconfd || true
 sleep 5
-/usr/sbin/service opsipxeconfd restart || true
+systemctl restart opsipxeconfd || true
 sleep 5
 
 count=0
-while [[ $(timeout 5 bash -c "</dev/tcp/localhost/4447" > /dev/null; echo $?) -eq 1 && $count -le 600 ]]; do
+while [[ $(timeout 5 bash -c "</dev/tcp/localhost/4447" > /dev/null; echo $?) -eq 1 && $count -le 60 ]]; do
 	$VERBOSE && echo "Waiting for opsiconfd to start..."
 	count=$((count+1))
 	sleep 1
