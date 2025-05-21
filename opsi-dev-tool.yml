@@ -122,7 +122,6 @@ package:
         - redis-server (>= 6.0)
         - redis-timeseries
         - grafana
-        - cabextract
         - wimtools | wimlib
         - smbclient | samba-client
       provides:
